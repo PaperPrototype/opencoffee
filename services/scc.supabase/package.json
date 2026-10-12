@@ -1,0 +1,24 @@
+{
+	"name": "scc.supabase",
+	"private": true,
+	"version": "0.0.1",
+	"type": "module",
+	"scripts": {
+		"start": "supabase start",
+		"stop": "supabase stop",
+		"stop:clean": "supabase stop --no-backup",
+		"restart": "supabase stop && supabase start",
+		"status": "supabase status",
+		"studio": "open http://127.0.0.1:55323",
+		"db:reset": "supabase db reset",
+		"db:lint": "supabase db lint",
+		"migration:new": "supabase migration new",
+		"migration:diff": "supabase db diff -f",
+		"migration:list": "supabase migration list --local",
+		"migration:up": "supabase migration up",
+		"gen:types": "supabase gen types typescript --local > types/database.ts"
+	},
+	"devDependencies": {
+		"supabase": "^2.120.0"
+	}
+}

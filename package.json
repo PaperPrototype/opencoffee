@@ -1,0 +1,25 @@
+{
+  "name": "opencoffee",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev:web": "pnpm --filter scc.web dev",
+    "db:start": "pnpm --filter scc.supabase start",
+    "db:stop": "pnpm --filter scc.supabase stop",
+    "db:restart": "pnpm --filter scc.supabase restart",
+    "db:status": "pnpm --filter scc.supabase status",
+    "db:studio": "pnpm --filter scc.supabase studio",
+    "db:reset": "pnpm --filter scc.supabase db:reset",
+    "db:lint": "pnpm --filter scc.supabase db:lint",
+    "db:migration:new": "pnpm --filter scc.supabase migration:new",
+    "db:migration:diff": "pnpm --filter scc.supabase migration:diff",
+    "db:migration:list": "pnpm --filter scc.supabase migration:list",
+    "db:migration:up": "pnpm --filter scc.supabase migration:up",
+    "db:types": "pnpm --filter scc.supabase gen:types"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.23.0"
+}
