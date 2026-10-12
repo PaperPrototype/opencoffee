@@ -1,0 +1,34 @@
+<svg width="320" height="320" viewBox="0 0 320 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <path id="oneFeeStampTextRing" d="M160 48 A112 112 0 1 1 159.9 48" fill="none"/>
+  </defs>
+  <!-- Outer espresso ring, hand-stamped wobble (sibling of stamp-free-forever.svg) -->
+  <circle cx="160" cy="160" r="150" stroke="#241610" stroke-width="3" fill="none" opacity="0.92"
+          stroke-dasharray="940 6" transform="rotate(-2 160 160)"/>
+  <circle cx="160" cy="160" r="140" stroke="#241610" stroke-width="1.5" fill="none" opacity="0.5"/>
+  <!-- Text ring -->
+  <text font-family="'IBM Plex Mono', monospace" font-size="17.5" font-weight="600" letter-spacing="3.2" fill="#241610">
+    <textPath href="#oneFeeStampTextRing" startOffset="2">ONE SMALL FEE • FROM DAY ONE • FOREVER •</textPath>
+  </text>
+  <!-- Olive inner ring -->
+  <circle cx="160" cy="160" r="92" stroke="#66703C" stroke-width="2.5" fill="none" opacity="0.95"
+          stroke-dasharray="576 5" transform="rotate(3 160 160)"/>
+  <!-- Ticket-stub icon: rounded ticket with perforation + '$0' -->
+  <g stroke="#241610" stroke-width="3" stroke-linecap="round" fill="none">
+    <path d="M118 138 C118 138 128 138 128 148 C128 158 118 158 118 158 L118 182 C118 182 128 182 128 172 C128 162 118 162 118 162 Z" opacity="0"/>
+    <rect x="112" y="136" width="96" height="56" rx="10"/>
+    <line x1="176" y1="142" x2="176" y2="186" stroke-dasharray="5 6"/>
+  </g>
+  <!-- Corner notches punched out of the ticket outline -->
+  <circle cx="112" cy="164" r="6" fill="#FAF5EC"/>
+  <circle cx="208" cy="164" r="6" fill="#FAF5EC"/>
+  <circle cx="112" cy="164" r="6" fill="none" stroke="#241610" stroke-width="3" stroke-dasharray="30 40" transform="rotate(90 112 164)"/>
+  <circle cx="208" cy="164" r="6" fill="none" stroke="#241610" stroke-width="3" stroke-dasharray="30 40" transform="rotate(-90 208 164)"/>
+  <!-- $0 in the ticket's left half -->
+  <text x="144" y="176" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="20" font-weight="700" fill="#66703C" stroke="none">~3–4%</text>
+  <!-- Small olive stars flanking the ticket -->
+  <g fill="#66703C">
+    <path d="M96 160 l3.5 7 7 3.5 -7 3.5 -3.5 7 -3.5 -7 -7 -3.5 7 -3.5 Z" transform="translate(-6 -2) scale(0.8)"/>
+    <path d="M224 160 l3.5 7 7 3.5 -7 3.5 -3.5 7 -3.5 -7 -7 -3.5 7 -3.5 Z" transform="translate(6 -2) scale(0.8)"/>
+  </g>
+</svg>

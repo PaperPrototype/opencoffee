@@ -1,0 +1,188 @@
+@import 'tailwindcss';
+
+/* Only our theme ships; daisyUI's built-ins (incl. the prefers-dark "dark") are disabled. */
+@plugin 'daisyui' {
+	themes: false;
+}
+
+/*
+ * Specialty Coffee Community — "zine" theme.
+ * Warm paper, espresso ink, terracotta accents; hard offset shadows and 2px ink borders.
+ * Palette taken from specialtycoffeecommunity.com.
+ */
+@plugin 'daisyui/theme' {
+	name: 'scc';
+	default: true;
+	prefersdark: false;
+	color-scheme: light;
+
+	/* Surfaces: milk (cards, inputs) → paper (page) → paper-deep (banded sections) */
+	--color-base-100: #fffdf8;
+	--color-base-200: #faf5ec;
+	--color-base-300: #f2e9da;
+	--color-base-content: #241610;
+
+	/* Terracotta */
+	--color-primary: #c4572a;
+	--color-primary-content: #faf5ec;
+	/* Gold (marquee, highlights on dark) */
+	--color-secondary: #d9a441;
+	--color-secondary-content: #241610;
+	/* Olive ("free", "all-in", success-ish chips) */
+	--color-accent: #66703c;
+	--color-accent-content: #faf5ec;
+	/* Espresso ink (dark sections, ink borders) */
+	--color-neutral: #241610;
+	--color-neutral-content: #faf5ec;
+
+	--color-info: #3f6e8c;
+	--color-info-content: #fffdf8;
+	--color-success: #66703c;
+	--color-success-content: #faf5ec;
+	--color-warning: #d9a441;
+	--color-warning-content: #241610;
+	--color-error: #b2452a;
+	--color-error-content: #faf5ec;
+
+	--radius-selector: 2rem;
+	--radius-field: 0.75rem;
+	--radius-box: 0.875rem;
+	--size-selector: 0.25rem;
+	--size-field: 0.25rem;
+	--border: 2px;
+	--depth: 0;
+	--noise: 0;
+}
+
+@theme {
+	--font-sans: 'Instrument Sans', system-ui, sans-serif;
+	--font-display: 'Fraunces', Georgia, serif;
+	--font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+	/* Named brand colors, for when the semantic daisyUI name reads wrong in markup */
+	--color-espresso: #241610;
+	--color-roast: #4a3226;
+	--color-crema: #8c6a4f;
+	--color-line: #e4d6c1;
+	--color-paper: #faf5ec;
+	--color-milk: #fffdf8;
+	--color-ember: #e07840;
+
+	--shadow-zine-sm: 3px 3px 0 0 var(--color-espresso);
+	--shadow-zine: 4px 4px 0 0 var(--color-espresso);
+	--shadow-zine-md: 5px 5px 0 0 var(--color-espresso);
+	--shadow-zine-lg: 8px 8px 0 0 var(--color-espresso);
+
+	--animate-marquee: marquee 28s linear infinite;
+	@keyframes marquee {
+		to {
+			transform: translateX(-50%);
+		}
+	}
+}
+
+@layer base {
+	/* daisyUI paints the root with base-100 (milk); the page itself sits on paper */
+	:root {
+		--root-bg: var(--color-base-200);
+	}
+	body {
+		@apply font-sans text-[17px] leading-[1.65] antialiased;
+	}
+	h1,
+	h2,
+	h3 {
+		@apply font-display;
+	}
+	::selection {
+		@apply bg-primary text-primary-content;
+	}
+}
+
+/* Zine treatments layered on top of daisyUI components */
+@layer components {
+	/* Milk card with a 2px ink border and offset shadow */
+	.card-zine {
+		@apply rounded-box border-2 border-espresso bg-base-100 shadow-zine-md;
+	}
+	.card-zine-hover {
+		@apply transition-[transform,box-shadow] duration-250 ease-out;
+		&:hover {
+			@apply -translate-x-[3px] -translate-y-[3px] shadow-zine-lg;
+		}
+	}
+	.eyebrow {
+		@apply font-mono text-xs font-medium tracking-[0.16em] text-primary uppercase;
+	}
+	.chip {
+		@apply inline-flex items-center gap-1 rounded-full border-[1.5px] border-espresso bg-base-200 px-2.5 py-[3px] font-mono text-[11px] tracking-[0.08em] uppercase;
+	}
+	/* Underlined text link with a terracotta rule; its arrow nudges on hover */
+	.link-zine {
+		@apply inline-flex items-center gap-1.5 font-semibold underline decoration-primary decoration-2 underline-offset-4;
+		& svg {
+			@apply transition-transform duration-200;
+		}
+		&:hover svg {
+			@apply translate-x-1.5;
+		}
+	}
+	/* Hand-drawn squiggle under a word */
+	.squiggle {
+		background: url('/img/underline-squiggle.svg') 50% 100% / 100% 0.22em no-repeat;
+		padding-bottom: 0.14em;
+	}
+	.grain {
+		@apply pointer-events-none fixed inset-0 z-[90] opacity-[0.06] mix-blend-multiply;
+		background: url('/img/texture-grain.png') repeat;
+		background-size: 512px 512px;
+	}
+	.display {
+		@apply font-display;
+		font-variation-settings:
+			'SOFT' 60,
+			'opsz' 144;
+	}
+}
+
+/*
+ * Ink-bordered button with a hard offset shadow; lifts on hover, presses on click.
+ * A utility (not a component) so it wins over daisyUI's own .btn border/shadow.
+ * Pair with a daisyUI color: `btn btn-primary btn-zine`.
+ */
+@utility btn-zine {
+	border: 2px solid var(--color-espresso);
+	box-shadow: var(--shadow-zine);
+	transition:
+		transform 0.18s ease,
+		box-shadow 0.18s ease,
+		background-color 0.18s ease;
+	&:hover {
+		transform: translateY(-2px);
+		box-shadow: 6px 6px 0 0 var(--color-espresso);
+		border-color: var(--color-espresso);
+	}
+	&:active {
+		transform: translateY(1px);
+		box-shadow: 1px 1px 0 0 var(--color-espresso);
+	}
+	&.btn-primary:hover {
+		background-color: var(--color-ember);
+	}
+}
+
+/* Ink-bordered form field (daisyUI input/textarea) */
+@utility field-zine {
+	border: 2px solid var(--color-espresso);
+	&:focus,
+	&:focus-within {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 2px;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.animate-marquee {
+		animation: none;
+	}
+}

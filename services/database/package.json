@@ -1,5 +1,5 @@
 {
-	"name": "scc.supabase",
+	"name": "database",
 	"private": true,
 	"version": "0.0.1",
 	"type": "module",
@@ -16,7 +16,15 @@
 		"migration:diff": "supabase db diff -f",
 		"migration:list": "supabase migration list --local",
 		"migration:up": "supabase migration up",
-		"gen:types": "supabase gen types typescript --local > types/database.ts"
+		"gen:types": "supabase gen types typescript --local > types/database.ts",
+		"remote:login": "supabase login",
+		"remote:link": "supabase link --project-ref akvifztorganefxiibek",
+		"remote:unlink": "supabase unlink",
+		"remote:pull": "supabase db pull",
+		"remote:push:dry": "supabase db push --dry-run",
+		"remote:push": "supabase db push",
+		"remote:migration:list": "supabase migration list --linked",
+		"gen:types:remote": "supabase gen types typescript --linked > types/database.ts"
 	},
 	"devDependencies": {
 		"supabase": "^2.120.0"

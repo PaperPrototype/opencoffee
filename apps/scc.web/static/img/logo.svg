@@ -1,0 +1,18 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Hand-stamped badge: coffee bean whose crease morphs into a speech-bubble tail -->
+  <g stroke="#241610" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <!-- Outer hand-drawn circle (slight wobble) -->
+    <path d="M100 14 C139 12 181 47 185 95 C189 145 150 186 101 187 C52 188 14 148 15 99 C16 51 61 16 100 14 Z" opacity="0.9"/>
+    <!-- Inner circle, imperfect -->
+    <path d="M101 27 C136 26 170 56 173 97 C176 139 142 173 100 174 C59 175 27 142 27 100 C27 59 66 28 101 27 Z" opacity="0.45"/>
+    <!-- Coffee bean body -->
+    <path d="M100 52 C128 51 148 73 148.5 99 C149 126 128 148 100 148.5 C72 149 52 127 51.5 100 C51 73 72 53 100 52 Z"/>
+    <!-- Bean crease morphing into a speech-bubble tail -->
+    <path d="M99 55 C91 72 109 82 100 99 C92 114 108 126 99 145"/>
+    <!-- Speech bubble tail curling out of the crease bottom-right -->
+    <path d="M100 145 C112 143 124 148 130 158 C122 156 115 157 110 161" />
+    <!-- Highlight dimples, stamp-like -->
+    <path d="M70 84 C73 78 79 73 85 71" opacity="0.6"/>
+    <path d="M118 126 C124 123 129 118 131 112" opacity="0.6"/>
+  </g>
+</svg>

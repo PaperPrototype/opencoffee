@@ -1,0 +1,119 @@
+@import 'tailwindcss';
+
+/* Only our theme ships; daisyUI's built-ins are disabled. */
+@plugin 'daisyui' {
+	themes: false;
+}
+
+/*
+ * World Espresso Championship — "scoreboard" theme.
+ * Dark espresso surfaces, sand type, copper/cinnamon heat; soft hairline rings and deep shadows.
+ * Palette taken from platform.worldespressochampionship.com.
+ */
+@plugin 'daisyui/theme' {
+	name: 'wec';
+	default: true;
+	prefersdark: true;
+	color-scheme: dark;
+
+	/* Surfaces: espresso-soft (cards) → page → espresso (deepest wells) */
+	--color-base-100: #221a13;
+	--color-base-200: #1d1510;
+	--color-base-300: #17110c;
+	--color-base-content: #decca7;
+
+	/* Copper — primary CTAs */
+	--color-primary: #b87333;
+	--color-primary-content: #17110c;
+	/* Cinnamon — banners, live controls */
+	--color-secondary: #994d27;
+	--color-secondary-content: #decca7;
+	/* Amber — eyebrows, highlights, the "reveal" */
+	--color-accent: #c48d49;
+	--color-accent-content: #17110c;
+	/* Roasted brown — quiet chrome */
+	--color-neutral: #2c1c12;
+	--color-neutral-content: #decca7;
+
+	--color-info: #4e8ca3;
+	--color-info-content: #17110c;
+	--color-success: #7c8a4a;
+	--color-success-content: #17110c;
+	--color-warning: #c48d49;
+	--color-warning-content: #17110c;
+	--color-error: #c0442b;
+	--color-error-content: #decca7;
+
+	--radius-selector: 2rem;
+	--radius-field: 2rem;
+	--radius-box: 1rem;
+	--size-selector: 0.25rem;
+	--size-field: 0.25rem;
+	--border: 1px;
+	--depth: 0;
+	--noise: 0;
+}
+
+@theme {
+	--font-sans: 'Lexend', 'Proxima Nova', ui-sans-serif, system-ui, sans-serif;
+
+	/* Named brand colors, for when the semantic daisyUI name reads wrong in markup */
+	--color-espresso: #17110c;
+	--color-espresso-soft: #221a13;
+	--color-sand: #decca7;
+	--color-copper: #b87333;
+	--color-cinnamon: #994d27;
+	--color-cinnamon-deep: #7a3b1d;
+	--color-cinnamon-light: #c47a5a;
+	--color-amber: #c48d49;
+
+	/* Hairline sand ring + long soft drop: every card on the board */
+	--shadow-board:
+		0 0 0 1px rgb(222 204 167 / 0.12),
+		0 18px 50px -18px rgb(0 0 0 / 0.65);
+}
+
+@layer base {
+	/* The board: copper glow top-right, amber glow bottom-left, over an espresso fade */
+	:root {
+		--root-bg: #17110c;
+		background:
+			radial-gradient(1200px 600px at 85% -10%, rgb(153 77 39 / 0.28), transparent 60%),
+			radial-gradient(900px 500px at -10% 110%, rgb(196 141 73 / 0.16), transparent 55%),
+			linear-gradient(180deg, #17110c, #1d1510) fixed;
+	}
+	body {
+		@apply font-sans antialiased;
+	}
+	::selection {
+		@apply bg-secondary text-secondary-content;
+	}
+}
+
+@layer components {
+	/* Board card: espresso-soft panel with a hairline ring */
+	.card-board {
+		@apply rounded-box bg-base-100 shadow-board;
+	}
+	/* Tracked, heavy micro-label — "WEC 2026 WORLD FINAL", "LIVE EVENT STATS" */
+	.eyebrow {
+		@apply text-[10px] font-extrabold tracking-[0.3em] text-accent uppercase;
+	}
+	.label-muted {
+		@apply text-[10px] font-extrabold tracking-[0.25em] text-sand/50 uppercase;
+	}
+	/* Film-grain overlay (pseudo-element so it never blocks clicks) */
+	.grain {
+		@apply relative;
+		&::after {
+			content: '';
+			@apply pointer-events-none absolute inset-0 opacity-50;
+			background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.05'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+		}
+	}
+}
+
+/* daisyUI tweaks: tracked uppercase buttons like the board's controls */
+@utility btn-board {
+	@apply font-extrabold tracking-wider uppercase;
+}
