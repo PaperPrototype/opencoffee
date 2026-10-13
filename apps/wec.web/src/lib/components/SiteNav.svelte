@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { ChevronDown, CircleAlert, Menu, X } from '@lucide/svelte';
+	import { page } from '$app/state';
 	import { menus } from '#lib/site.js';
+
+	const signedIn = $derived(!!page.data.session);
 
 	let announcement = $state(true);
 </script>
@@ -43,7 +46,12 @@
 		</nav>
 
 		<div class="flex items-center gap-2">
-			<a href="#partner" class="btn hidden rounded-lg btn-secondary px-4 text-sm sm:inline-flex">Partner With Us</a>
+			{#if signedIn}
+				<a href="/account" class="btn hidden btn-ghost px-3 text-sm font-normal text-sand/80 hover:text-sand sm:inline-flex">Account</a>
+			{:else}
+				<a href="/auth" class="btn hidden btn-ghost px-3 text-sm font-normal text-sand/80 hover:text-sand sm:inline-flex">Sign in</a>
+			{/if}
+			<a href="/#partner" class="btn hidden rounded-lg btn-secondary px-4 text-sm sm:inline-flex">Partner With Us</a>
 			<div class="dropdown dropdown-end lg:hidden">
 				<button tabindex="0" class="btn btn-square btn-ghost" aria-label="Menu">
 					<Menu class="size-6" />
@@ -62,8 +70,12 @@
 						</li>
 					{/each}
 					<li><a href="/platform" class="font-semibold text-accent">Live Demo</a></li>
+					<li>
+						{#if signedIn}<a href="/account" class="font-semibold">Account</a>
+						{:else}<a href="/auth" class="font-semibold">Sign in</a>{/if}
+					</li>
 					<li class="mt-2">
-						<a href="#partner" class="btn rounded-lg btn-secondary">Partner With Us</a>
+						<a href="/#partner" class="btn rounded-lg btn-secondary">Partner With Us</a>
 					</li>
 				</ul>
 			</div>

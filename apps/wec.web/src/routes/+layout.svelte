@@ -1,9 +1,21 @@
 <script lang="ts">
 	import '../app.css';
+	import { onMount } from 'svelte';
+	import { invalidate } from '$app/navigation';
 	import favicon from '#lib/assets/favicon.png';
 	import type { LayoutProps } from './$types';
 
-	let { children }: LayoutProps = $props();
+	let { data, children }: LayoutProps = $props();
+
+	onMount(() => {
+		// Re-run the layout load whenever the session changes (sign in/out, token refresh, other tabs).
+		const {
+			data: { subscription }
+		} = data.supabase.auth.onAuthStateChange((_event, newSession) => {
+			if (newSession?.expires_at !== data.session?.expires_at) invalidate('supabase:auth');
+		});
+		return () => subscription.unsubscribe();
+	});
 </script>
 
 <svelte:head>

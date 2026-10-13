@@ -1,5 +1,8 @@
 @import 'tailwindcss';
 
+/* Shared workspace components (avatar picker) use Tailwind classes too. */
+@source '../../../packages/avatars/src';
+
 /* Only our theme ships; daisyUI's built-ins (incl. the prefers-dark "dark") are disabled. */
 @plugin 'daisyui' {
 	themes: false;
@@ -184,5 +187,15 @@
 @media (prefers-reduced-motion: reduce) {
 	.animate-marquee {
 		animation: none;
+	}
+}
+
+/* Avatar picker (packages/avatars) in the zine style */
+@layer components {
+	.avatar-picker-label {
+		@apply font-mono text-[11px] tracking-[0.14em] text-crema uppercase;
+	}
+	.avatar-picker-option {
+		@apply ring-espresso ring-offset-base-100;
 	}
 }

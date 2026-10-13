@@ -1,0 +1,18 @@
+<!--
+  Every site signs in with the one Specialty Coffee Community (SCC) account, so auth emails are
+  SCC-branded. The link goes back to whichever site requested it via {{ .RedirectTo }}
+  (that site's /auth/confirm).
+-->
+<div style="font-family: system-ui, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; color: #241610; background: #faf5ec">
+	<p style="margin: 0 0 24px; font-family: Georgia, serif; font-size: 18px; font-weight: 600">Specialty Coffee Community</p>
+	<h2 style="margin: 0 0 16px">Reset your SCC password</h2>
+	<p>We received a request to reset the password for your Specialty Coffee Community account.</p>
+	<p style="margin: 24px 0">
+		<a
+			href="{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=recovery"
+			style="background: #c4572a; color: #faf5ec; padding: 12px 20px; border: 2px solid #241610; border-radius: 12px; text-decoration: none; font-weight: 600"
+			>Choose a new password</a
+		>
+	</p>
+	<p style="color: #8c6a4f; font-size: 14px">If you didn't ask for this, you can ignore this email.</p>
+</div>

@@ -1,0 +1,21 @@
+<!--
+  Every site signs in with the one Specialty Coffee Community (SCC) account, so auth emails are
+  SCC-branded. The link goes back to whichever site requested it via {{ .RedirectTo }}
+  (that site's /auth/confirm), so someone signing up on WEC lands back on WEC.
+-->
+<div style="font-family: system-ui, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; color: #241610; background: #faf5ec">
+	<p style="margin: 0 0 24px; font-family: Georgia, serif; font-size: 18px; font-weight: 600">Specialty Coffee Community</p>
+	<h2 style="margin: 0 0 16px">Confirm your SCC account</h2>
+	<p>Thanks for joining. Confirm this is your email address to finish creating your free Specialty Coffee Community account.</p>
+	<p style="margin: 24px 0">
+		<a
+			href="{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=email"
+			style="background: #c4572a; color: #faf5ec; padding: 12px 20px; border: 2px solid #241610; border-radius: 12px; text-decoration: none; font-weight: 600"
+			>Confirm email</a
+		>
+	</p>
+	<p style="color: #8c6a4f; font-size: 14px">
+		One account works across the Specialty Coffee Community and the World Espresso Championship.
+		If you didn't sign up, you can ignore this email.
+	</p>
+</div>

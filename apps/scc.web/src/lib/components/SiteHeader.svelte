@@ -1,5 +1,8 @@
 <script lang="ts">
 	import { Menu, Search } from '@lucide/svelte';
+	import { page } from '$app/state';
+
+	const signedIn = $derived(!!page.data.session);
 
 	const nav = [
 		'Events',
@@ -57,7 +60,12 @@
 			>
 				<Search class="size-[18px]" />
 			</button>
-			<a href="/" class="btn hidden btn-primary btn-zine px-5 text-sm sm:inline-flex">Join free</a>
+			{#if signedIn}
+				<a href="/account" class="btn hidden btn-primary btn-zine px-5 text-sm sm:inline-flex">Account</a>
+			{:else}
+				<a href="/auth" class="hidden text-[14.5px] font-medium hover:text-primary sm:inline">Sign in</a>
+				<a href="/auth?mode=signup" class="btn hidden btn-primary btn-zine px-5 text-sm sm:inline-flex">Join free</a>
+			{/if}
 
 			<div class="dropdown dropdown-end min-[1360px]:hidden">
 				<button
@@ -74,9 +82,14 @@
 					{#each nav as item (item)}
 						<li><a href="/">{item}</a></li>
 					{/each}
-					<li class="mt-2 sm:hidden">
-						<a href="/" class="btn btn-primary btn-zine">Join free</a>
-					</li>
+					{#if signedIn}
+						<li class="mt-2 sm:hidden"><a href="/account" class="btn btn-primary btn-zine">Account</a></li>
+					{:else}
+						<li class="sm:hidden"><a href="/auth">Sign in</a></li>
+						<li class="mt-2 sm:hidden">
+							<a href="/auth?mode=signup" class="btn btn-primary btn-zine">Join free</a>
+						</li>
+					{/if}
 				</ul>
 			</div>
 		</div>

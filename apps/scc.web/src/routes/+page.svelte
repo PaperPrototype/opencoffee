@@ -476,10 +476,12 @@
 				free events stay free. No trials, no tiers, no 'premium' — bring your questions, especially the
 				dumb ones.
 			</p>
-			<form class="mx-auto mt-10 flex max-w-[444px] flex-col gap-4 sm:flex-row" onsubmit={(e) => e.preventDefault()}>
+			<form class="mx-auto mt-10 flex max-w-[444px] flex-col gap-4 sm:flex-row" method="GET" action="/auth">
+				<input type="hidden" name="mode" value="signup" />
 				<label class="sr-only" for="join-email">Email</label>
 				<input
 					id="join-email"
+					name="email"
 					type="email"
 					placeholder="you@coffeeplace.com"
 					class="input h-[52px] flex-1 border-0 text-base-content placeholder:text-crema"

@@ -1,5 +1,8 @@
 @import 'tailwindcss';
 
+/* Shared workspace components (avatar picker) use Tailwind classes too. */
+@source '../../../packages/avatars/src';
+
 /* Only our theme ships; daisyUI's built-ins are disabled. */
 @plugin 'daisyui' {
 	themes: false;
@@ -116,4 +119,14 @@
 /* daisyUI tweaks: tracked uppercase buttons like the board's controls */
 @utility btn-board {
 	@apply font-extrabold tracking-wider uppercase;
+}
+
+/* Avatar picker (packages/avatars) in the scoreboard style */
+@layer components {
+	.avatar-picker-label {
+		@apply text-[10px] font-extrabold tracking-[0.25em] text-sand/50 uppercase;
+	}
+	.avatar-picker-option {
+		@apply ring-sand ring-offset-base-100;
+	}
 }
