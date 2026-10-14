@@ -21,15 +21,33 @@
 	import SiteHeader from '#lib/components/SiteHeader.svelte';
 	import TicketCard from '#lib/components/TicketCard.svelte';
 	import {
-		festivals,
+		festivals as demoFestivals,
 		foundingClasses,
 		goingAvatars,
-		heroStack,
-		moreFestivals,
+		heroStack as demoHeroStack,
+		moreFestivals as demoMoreFestivals,
 		pledges,
 		threads,
-		thisWeek
+		thisWeek as demoThisWeek
 	} from '#lib/landing.js';
+	import type { PageProps } from './$types';
+
+	let { data }: PageProps = $props();
+
+	// Real events once there are any; the pre-launch demo otherwise (linked to /events, not to fake pages).
+	const toEvents = <T extends object>(list: T[]) => list.map((e) => ({ ...e, href: '/events' }));
+	const heroStack = $derived(data.heroStack.length === 3 ? data.heroStack : toEvents(demoHeroStack));
+	const thisWeek = $derived(data.thisWeek.length ? data.thisWeek : toEvents(demoThisWeek));
+	const weekCount = $derived(data.thisWeek.length ? data.weekCount : 64);
+	const realFestivals = $derived(data.festivals.length > 0);
+	const festivals = $derived(
+		realFestivals ? data.festivals.map((f) => ({ ...f, href: `/event/${f.slug}` })) : demoFestivals.map((f) => ({ ...f, href: '/events?category=festival' }))
+	);
+	const moreFestivals = $derived(
+		realFestivals
+			? data.moreFestivals.map((f) => ({ label: f.label, href: `/event/${f.slug}` }))
+			: demoMoreFestivals.map((label) => ({ label, href: '/events?category=festival' }))
+	);
 
 	const quickFilters = ['Throwdowns', 'Free cuppings', 'This weekend', 'Festivals 2026', 'London', 'Tokyo'];
 
@@ -97,12 +115,14 @@
 
 			<form
 				class="mt-9 flex max-w-[672px] flex-col card-zine shadow-zine sm:flex-row sm:items-center"
-				onsubmit={(e) => e.preventDefault()}
+				action="/events"
+				method="GET"
 			>
 				<label class="flex flex-1 items-center">
 					<span class="sr-only">Search events</span>
 					<input
 						type="search"
+						name="q"
 						placeholder="Search events, cities, organizers… try 'throwdown'"
 						class="input h-12 w-full border-0 bg-transparent px-5 text-[15px] placeholder:text-crema focus:outline-none"
 					/>
@@ -133,7 +153,7 @@
 			</div>
 
 			<p class="mt-8 flex items-center gap-2 font-mono text-[13px] text-crema">
-				<CalendarDays class="size-4 text-primary" /> 64 events this week worldwide
+				<CalendarDays class="size-4 text-primary" /> {weekCount} {weekCount === 1 ? 'event' : 'events'} this week worldwide
 			</p>
 		</div>
 
@@ -161,7 +181,7 @@
 		<div class="grid grid-cols-2 lg:grid-cols-4">
 			{#each pillars as pillar, i (pillar.title)}
 				<a
-					href="/"
+					href={pillar.title === 'Events' ? '/events' : '/'}
 					class="group flex flex-col gap-2 p-5 transition-colors hover:bg-base-300 md:px-16 md:py-7 lg:px-16
 						{i % 2 === 1 ? 'border-l-2 border-espresso' : ''}
 						{i === 2 ? 'border-t-2 border-espresso lg:border-t-0 lg:border-l-2' : ''}
@@ -194,7 +214,7 @@
 					>
 						<MapPin class="size-4 text-primary" /> Near Portland, OR
 					</span>
-					<a href="/" class="link-zine">All 64 this week <ArrowRight class="size-4" /></a>
+					<a href="/events?when=week" class="link-zine">All {weekCount} this week <ArrowRight class="size-4" /></a>
 				</div>
 			</div>
 		</div>
@@ -231,16 +251,18 @@
 							<span class="chip border-accent text-[10px] font-semibold text-accent">All-in · no checkout fees</span>
 						</div>
 						<div class="mt-4 flex items-center">
-							<div class="flex -space-x-2">
-								{#each goingAvatars as src (src)}
-									<img {src} alt="" class="size-8 rounded-full border-2 border-paper object-cover" />
-								{/each}
-							</div>
-							<span class="chip ml-2 bg-base-100 whitespace-nowrap"><Users class="size-3 text-primary" /> {fest.going} going</span>
+							{#if !realFestivals}
+								<div class="mr-2 flex -space-x-2">
+									{#each goingAvatars as src (src)}
+										<img {src} alt="" class="size-8 rounded-full border-2 border-paper object-cover" />
+									{/each}
+								</div>
+							{/if}
+							<span class="chip bg-base-100 whitespace-nowrap"><Users class="size-3 text-primary" /> {fest.going} going</span>
 						</div>
 						<div class="mt-auto flex items-center justify-between gap-3 border-t-2 border-line pt-4">
-							<a href="/" class="link-zine text-sm">Details <ArrowRight class="size-4" /></a>
-							<a href="/" class="btn btn-primary btn-zine text-sm">Get tickets</a>
+							<a href={fest.href} class="link-zine text-sm">Details <ArrowRight class="size-4" /></a>
+							<a href={fest.href} class="btn btn-primary btn-zine text-sm">Get tickets</a>
 						</div>
 					</div>
 				</article>
@@ -248,8 +270,8 @@
 		</div>
 
 		<div class="mt-10 flex flex-wrap justify-center gap-x-8 gap-y-2">
-			{#each moreFestivals as fest (fest)}
-				<a href="/" class="font-mono text-xs tracking-[0.14em] text-crema uppercase transition-colors hover:text-primary">{fest}</a>
+			{#each moreFestivals as fest (fest.label)}
+				<a href={fest.href} class="font-mono text-xs tracking-[0.14em] text-crema uppercase transition-colors hover:text-primary">{fest.label}</a>
 			{/each}
 		</div>
 	</section>
@@ -282,7 +304,7 @@
 				</span>
 			</div>
 			<div class="mt-10 flex flex-wrap justify-center gap-4">
-				<a href="/" class="btn btn-primary text-[15px]">List your event — free</a>
+				<a href="/host" class="btn btn-primary text-[15px]">List your event — free</a>
 				<a href="/" class="btn border-2 border-neutral-content bg-transparent text-[15px] text-neutral-content hover:bg-neutral-content hover:text-neutral">
 					See the ticketing math →
 				</a>

@@ -103,7 +103,7 @@
 						name="display_name"
 						autocomplete="name"
 						class="input h-12 w-full field-zine"
-						value={form && 'display_name' in form ? form.display_name : ''}
+						defaultValue={form && 'display_name' in form ? form.display_name : ''}
 					/>
 				{/if}
 
@@ -118,7 +118,7 @@
 					autocomplete="email"
 					placeholder="you@coffeeplace.com"
 					class="input h-12 w-full field-zine"
-					value={email}
+					defaultValue={email}
 				/>
 
 				{#if mode !== 'forgot'}

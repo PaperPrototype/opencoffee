@@ -21,7 +21,7 @@
 			<h4 class="eyebrow text-ember">Explore</h4>
 			<ul class="mt-4 space-y-2.5">
 				{#each explore as item (item)}
-					<li><a href="/" class="text-[15px] text-neutral-content/80 hover:text-primary">{item}</a></li>
+					<li><a href={item === 'Events' ? '/events' : '/'} class="text-[15px] text-neutral-content/80 hover:text-primary">{item}</a></li>
 				{/each}
 			</ul>
 		</div>

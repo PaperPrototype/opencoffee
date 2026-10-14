@@ -2,6 +2,8 @@
 
 export type TicketEvent = {
 	slug: string;
+	/** Where the card links; defaults to the event page. Demo cards point at /events. */
+	href?: string;
 	title: string;
 	image: string;
 	day: string;

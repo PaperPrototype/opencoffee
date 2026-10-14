@@ -60,9 +60,9 @@
 
 		<fieldset class="fieldset mt-4 gap-1">
 			<label class={label} for="display_name">Display name</label>
-			<input id="display_name" name="display_name" maxlength="80" class="input h-12 w-full rounded-lg" value={data.profile.display_name ?? ''} />
+			<input id="display_name" name="display_name" maxlength="80" class="input h-12 w-full rounded-lg" defaultValue={data.profile.display_name ?? ''} />
 			<label class="{label} mt-3" for="bio">Bio</label>
-			<textarea id="bio" name="bio" maxlength="1000" class="textarea h-28 w-full rounded-lg">{data.profile.bio ?? ''}</textarea>
+			<textarea id="bio" name="bio" maxlength="1000" class="textarea h-28 w-full rounded-lg" defaultValue={data.profile.bio ?? ''}></textarea>
 		</fieldset>
 
 		<div class="mt-6 flex items-center gap-4">

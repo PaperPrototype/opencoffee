@@ -4,6 +4,8 @@
 
 	const signedIn = $derived(!!page.data.session);
 
+	/** Sections that exist so far; the rest still point home. */
+	const links: Record<string, string> = { Events: '/events', 'For Organizers': '/host' };
 	const nav = [
 		'Events',
 		'For Organizers',
@@ -49,7 +51,7 @@
 
 		<nav class="hidden items-center gap-6 min-[1360px]:flex">
 			{#each nav as item (item)}
-				<a href="/" class="text-[14.5px] font-medium whitespace-nowrap transition-colors hover:text-primary">{item}</a>
+				<a href={links[item] ?? '/'} class="text-[14.5px] font-medium whitespace-nowrap transition-colors hover:text-primary">{item}</a>
 			{/each}
 		</nav>
 
@@ -80,7 +82,7 @@
 					class="dropdown-content menu z-10 mt-3 w-60 card-zine p-2 shadow-zine"
 				>
 					{#each nav as item (item)}
-						<li><a href="/">{item}</a></li>
+						<li><a href={links[item] ?? '/'}>{item}</a></li>
 					{/each}
 					{#if signedIn}
 						<li class="mt-2 sm:hidden"><a href="/account" class="btn btn-primary btn-zine">Account</a></li>

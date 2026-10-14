@@ -94,12 +94,12 @@
 						name="display_name"
 						autocomplete="name"
 						class="input h-12 w-full rounded-lg"
-						value={form && 'display_name' in form ? form.display_name : ''}
+						defaultValue={form && 'display_name' in form ? form.display_name : ''}
 					/>
 				{/if}
 
 				<label class="{label} {mode === 'signup' ? 'mt-3' : ''}" for="email">Email</label>
-				<input id="email" name="email" type="email" required autocomplete="email" class="input h-12 w-full rounded-lg" value={email} />
+				<input id="email" name="email" type="email" required autocomplete="email" class="input h-12 w-full rounded-lg" defaultValue={email} />
 
 				{#if mode !== 'forgot'}
 					<div class="mt-3 flex items-baseline justify-between">

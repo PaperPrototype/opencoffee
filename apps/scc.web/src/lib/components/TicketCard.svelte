@@ -18,7 +18,7 @@
 </script>
 
 <a
-	href="/event/{event.slug}"
+	href={event.href ?? `/event/${event.slug}`}
 	class="group card-zine card-zine-hover flex overflow-hidden {row
 		? 'flex-row'
 		: 'flex-col shadow-zine-lg'} {className}"

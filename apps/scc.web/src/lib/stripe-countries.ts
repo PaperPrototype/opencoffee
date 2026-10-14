@@ -1,0 +1,28 @@
+/** Countries where hosts can receive payouts through Stripe Connect (a common subset; extend as needed). */
+export const payoutCountries = [
+	{ code: 'US', name: 'United States' },
+	{ code: 'CA', name: 'Canada' },
+	{ code: 'GB', name: 'United Kingdom' },
+	{ code: 'IE', name: 'Ireland' },
+	{ code: 'AU', name: 'Australia' },
+	{ code: 'NZ', name: 'New Zealand' },
+	{ code: 'DE', name: 'Germany' },
+	{ code: 'FR', name: 'France' },
+	{ code: 'NL', name: 'Netherlands' },
+	{ code: 'BE', name: 'Belgium' },
+	{ code: 'ES', name: 'Spain' },
+	{ code: 'PT', name: 'Portugal' },
+	{ code: 'IT', name: 'Italy' },
+	{ code: 'AT', name: 'Austria' },
+	{ code: 'CH', name: 'Switzerland' },
+	{ code: 'DK', name: 'Denmark' },
+	{ code: 'SE', name: 'Sweden' },
+	{ code: 'NO', name: 'Norway' },
+	{ code: 'FI', name: 'Finland' },
+	{ code: 'PL', name: 'Poland' },
+	{ code: 'JP', name: 'Japan' },
+	{ code: 'SG', name: 'Singapore' },
+	{ code: 'HK', name: 'Hong Kong' },
+	{ code: 'MX', name: 'Mexico' },
+	{ code: 'BR', name: 'Brazil' }
+] as const;
