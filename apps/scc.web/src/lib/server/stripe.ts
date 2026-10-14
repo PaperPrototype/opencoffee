@@ -25,3 +25,6 @@ export function platformAccount() {
 		});
 	return platform;
 }
+
+/** SvelteKit only redirects off-site to allowlisted origins; these are Stripe's hosted pages. */
+export const stripeOrigins = { external: ['https://checkout.stripe.com', 'https://connect.stripe.com'] };

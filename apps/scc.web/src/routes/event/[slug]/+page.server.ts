@@ -3,7 +3,7 @@ import { orderFee } from '#lib/money.js';
 import { hostColumns } from '#lib/server/events.js';
 import { sendOrderConfirmation } from '#lib/server/email.js';
 import { expireOpenOrders, expireOrder } from '#lib/server/orders.js';
-import { stripe } from '#lib/server/stripe.js';
+import { stripe, stripeOrigins } from '#lib/server/stripe.js';
 import { supabaseAdmin } from '#lib/server/supabase-admin.js';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -166,6 +166,6 @@ export const actions: Actions = {
 			return fail(502, { message: 'Could not start checkout. Please try again.' });
 		}
 
-		redirect(303, checkoutUrl);
+		redirect(303, checkoutUrl, stripeOrigins);
 	}
 };

@@ -1,5 +1,5 @@
 import { redirect } from '@sveltejs/kit';
-import { stripe } from '#lib/server/stripe.js';
+import { stripe, stripeOrigins } from '#lib/server/stripe.js';
 import { supabaseAdmin } from '#lib/server/supabase-admin.js';
 import type { RequestHandler } from './$types';
 
@@ -14,5 +14,5 @@ export const GET: RequestHandler = async ({ url, locals: { user } }) => {
 		refresh_url: `${url.origin}/host/stripe/refresh`,
 		return_url: `${url.origin}/host/stripe/return`
 	});
-	redirect(303, link.url);
+	redirect(303, link.url, stripeOrigins);
 };

@@ -188,3 +188,30 @@ ${money ? `<p style="margin:12px 0 0">${esc(money)}</p>` : ''}
 		console.error(`Refund email failed for order ${orderId}`, err);
 	}
 }
+
+/** Tell a host Stripe approved their account and paid tickets are unlocked. */
+export async function sendHostPaymentsReady(userId: string, hostName: string, origin: string) {
+	try {
+		const { data } = await supabaseAdmin.auth.admin.getUserById(userId);
+		const to = data.user?.email;
+		if (!to) return;
+		await send({
+			to,
+			subject: 'Stripe is connected — you can sell paid tickets',
+			text: [
+				`Good news, ${hostName}: Stripe approved your account.`,
+				'You can now add paid tickets to your events. Ticket money goes straight to your Stripe account and pays out to your bank.',
+				'',
+				`Your host dashboard: ${origin}/host`
+			].join('\n'),
+			html: layout(
+				`<h1 style="font-family:Georgia,serif;font-size:28px;line-height:1.2;margin:8px 0 12px">You're ready to sell tickets.</h1>
+<p style="margin:0">Stripe approved the account for <strong>${esc(hostName)}</strong>. Add paid tickets to any event — the money goes straight to your Stripe account and pays out to your bank.</p>
+<p style="margin:24px 0 0">${button(`${origin}/host`, 'Go to your dashboard')}</p>`,
+				'Stripe approved your account — paid tickets are unlocked.'
+			)
+		});
+	} catch (err) {
+		console.error(`Host ready email failed for ${userId}`, err);
+	}
+}

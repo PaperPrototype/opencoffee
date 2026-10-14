@@ -1,4 +1,4 @@
-import { sendOrderConfirmation, sendOrderVoided } from '#lib/server/email.js';
+import { sendHostPaymentsReady, sendOrderConfirmation, sendOrderVoided } from '#lib/server/email.js';
 import { stripe, type Stripe } from '#lib/server/stripe.js';
 import { supabaseAdmin } from '#lib/server/supabase-admin.js';
 
@@ -89,14 +89,27 @@ export async function voidOrder(orderId: string, refunded: boolean, origin: stri
 	if (changed) await sendOrderVoided(orderId, origin, reason);
 }
 
-/** Pull a connected account's current state from Stripe into hosts. */
-export async function syncStripeAccount(account: Stripe.Account) {
+/**
+ * Pull a connected account's current state from Stripe into hosts. Called from the account.updated
+ * webhook and whenever a host opens their dashboard. The call that flips the account to "can receive
+ * ticket money" emails the host once.
+ */
+export async function syncStripeAccount(account: Stripe.Account, origin: string) {
+	const transfers = account.capabilities?.transfers === 'active';
+	const payouts = account.payouts_enabled ?? false;
+	const submitted = account.details_submitted ?? false;
+
+	if (transfers) {
+		const { data: flipped } = await supabaseAdmin
+			.from('hosts')
+			.update({ stripe_transfers_enabled: true, stripe_payouts_enabled: payouts, stripe_details_submitted: submitted })
+			.eq('stripe_account_id', account.id)
+			.eq('stripe_transfers_enabled', false)
+			.select('user_id, name');
+		if (flipped?.length) await sendHostPaymentsReady(flipped[0].user_id, flipped[0].name, origin);
+	}
 	await supabaseAdmin
 		.from('hosts')
-		.update({
-			stripe_transfers_enabled: account.capabilities?.transfers === 'active',
-			stripe_payouts_enabled: account.payouts_enabled ?? false,
-			stripe_details_submitted: account.details_submitted ?? false
-		})
+		.update({ stripe_transfers_enabled: transfers, stripe_payouts_enabled: payouts, stripe_details_submitted: submitted })
 		.eq('stripe_account_id', account.id);
 }

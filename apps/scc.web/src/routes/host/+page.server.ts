@@ -2,32 +2,36 @@ import { fail, isHttpError, redirect } from '@sveltejs/kit';
 import { slugify, slugSuffix } from '#lib/events.js';
 import { hostColumns } from '#lib/server/events.js';
 import { syncStripeAccount } from '#lib/server/orders.js';
-import { platformAccount, stripe } from '#lib/server/stripe.js';
+import { stripeStatus } from '#lib/stripe-status.js';
+import { platformAccount, stripe, stripeOrigins } from '#lib/server/stripe.js';
 import { supabaseAdmin } from '#lib/server/supabase-admin.js';
-import { payoutCountries } from '#lib/stripe-countries.js';
 import type { Actions, PageServerLoad } from './$types';
 
 // hooks.server.ts redirects signed-out visitors away from /host, so `user` is set here.
-export const load: PageServerLoad = async ({ locals: { supabase, user } }) => {
+export const load: PageServerLoad = async ({ url, locals: { supabase, user } }) => {
 	const { data: host } = await supabase.from('hosts').select(hostColumns).eq('user_id', user!.id).maybeSingle();
 	if (!host) {
 		const { data: profile } = await supabase.from('profiles').select('display_name').eq('user_id', user!.id).single();
-		return { host: null, events: [], balance: [], platformCountry: 'US', suggestedName: profile?.display_name ?? '' };
+		return { host: null, events: [], balance: [], stripe: stripeStatus(null), platformCountry: 'US', suggestedName: profile?.display_name ?? '' };
 	}
 
 	const { data: secret } = await supabaseAdmin.from('hosts').select('stripe_account_id').eq('id', host.id).single();
 	const accountId = secret?.stripe_account_id;
 
-	// Onboarding finishes on Stripe's side; refresh our copy until payments are switched on.
-	if (accountId && !host.stripe_transfers_enabled) {
+	// Read the account live: onboarding happens on Stripe's side, and the return redirect doesn't say
+	// whether the host finished. (The account.updated webhook keeps our copy current in between.)
+	let status = stripeStatus(null);
+	if (accountId) {
 		try {
 			const account = await stripe().accounts.retrieve(accountId);
-			await syncStripeAccount(account);
-			host.stripe_transfers_enabled = account.capabilities?.transfers === 'active';
-			host.stripe_payouts_enabled = account.payouts_enabled ?? false;
-			host.stripe_details_submitted = account.details_submitted ?? false;
+			await syncStripeAccount(account, url.origin);
+			status = stripeStatus(account);
+			host.stripe_transfers_enabled = status.state === 'active';
+			host.stripe_payouts_enabled = status.payoutsEnabled;
 		} catch (err) {
 			console.error('Stripe account sync failed', err);
+			// Fall back to our stored copy.
+			status = { state: host.stripe_transfers_enabled ? 'active' : 'incomplete', missing: [], dueBy: null, payoutsEnabled: host.stripe_payouts_enabled };
 		}
 	}
 
@@ -83,6 +87,7 @@ export const load: PageServerLoad = async ({ locals: { supabase, user } }) => {
 	return {
 		host,
 		balance,
+		stripe: status,
 		platformCountry,
 		events: (events ?? []).map((e) => ({ ...e, ...stats.get(e.id)! })),
 		suggestedName: ''
@@ -132,50 +137,47 @@ export const actions: Actions = {
 	},
 
 	/** Start (or resume) Stripe Connect onboarding so the host can sell paid tickets. */
-	connect: async ({ request, url, locals: { supabase, user } }) => {
+	connect: async ({ url, locals: { supabase, user } }) => {
 		const { data: host } = await supabase.from('hosts').select('id, name, website').eq('user_id', user!.id).single();
 		if (!host) return fail(400, { message: 'Create your host profile first.' });
 
-		const form = await request.formData();
 		const { data: existing } = await supabaseAdmin.from('hosts').select('stripe_account_id').eq('id', host.id).single();
 
 		let accountId = existing?.stripe_account_id;
 		let redirectTo: string;
 		try {
 			if (!accountId) {
-				const country = String(form.get('country') ?? '');
-				if (!payoutCountries.some((c) => c.code === country)) return fail(400, { message: 'Pick the country your bank account is in.' });
-
-				// Ticket money reaches hosts as transfers (destination charges), so `transfers` is the only
-				// capability they need. Hosts outside the platform's country can't take card payments
-				// directly anyway; they sign Stripe's lighter "recipient" agreement (cross-border payouts).
-				const crossBorder = country !== (await platformAccount()).country;
-				const account = await stripe().accounts.create(
+				// Hosts bank in the platform's country: cross-border payouts aren't available to every
+				// platform (an AU platform can't pay recipients abroad), so this keeps payouts reliable.
+				const platform = await platformAccount();
+				// Accounts v2 (Stripe requires it for new Connect platforms). Ticket money reaches hosts as
+				// transfers (destination charges), so the "recipient" configuration with stripe_transfers is
+				// all they need. Express dashboard; the platform pays Stripe's fees out of its application
+				// fee and covers negative balances.
+				const account = await stripe().v2.core.accounts.create(
 					{
-						country,
-						email: user!.email,
-						// Express-style: Stripe hosts onboarding and a light dashboard; the platform pays
-						// Stripe's processing fees out of its application fee and covers negative balances.
-						controller: {
-							stripe_dashboard: { type: 'express' },
-							fees: { payer: 'application' },
-							losses: { payments: 'application' }
-						},
-						capabilities: { transfers: { requested: true } },
-						...(crossBorder ? { tos_acceptance: { service_agreement: 'recipient' as const } } : {}),
-						business_profile: {
-							name: host.name,
-							product_description: 'Tickets to coffee events listed on Specialty Coffee Community',
-							...(host.website ? { url: host.website } : {})
+						contact_email: user!.email,
+						display_name: host.name,
+						dashboard: 'express',
+						identity: { country: platform.country },
+						configuration: { recipient: { capabilities: { stripe_balance: { stripe_transfers: { requested: true } } } } },
+						defaults: {
+							currency: platform.default_currency,
+							responsibilities: { fees_collector: 'application', losses_collector: 'application' },
+							profile: {
+								product_description: 'Tickets to coffee events listed on Specialty Coffee Community',
+								...(host.website ? { business_url: host.website } : {})
+							}
 						},
 						metadata: { host_id: host.id, user_id: user!.id }
 					},
-					{ idempotencyKey: `connect-account-${host.id}-${country}` }
+					{ idempotencyKey: `connect-account-v2-${host.id}` }
 				);
 				accountId = account.id;
 				await supabaseAdmin.from('hosts').update({ stripe_account_id: accountId }).eq('id', host.id);
 			}
 
+			// v1 account links work for v2 accounts (v2 links are sandbox-only in test mode).
 			const link = await stripe().accountLinks.create({
 				account: accountId,
 				type: 'account_onboarding',
@@ -186,14 +188,9 @@ export const actions: Actions = {
 		} catch (err) {
 			if (isHttpError(err)) throw err;
 			console.error('Stripe onboarding failed', err);
-			const message = err instanceof Error ? err.message : 'Could not reach Stripe. Try again.';
-			return fail(502, {
-				message: /cross-border|recipient|not supported|country/i.test(message)
-					? `Stripe can't pay out to hosts in that country from this platform yet (${message})`
-					: message
-			});
+			return fail(502, { message: err instanceof Error ? err.message : 'Could not reach Stripe. Try again.' });
 		}
-		redirect(303, redirectTo);
+		redirect(303, redirectTo, stripeOrigins);
 	},
 
 	/** Pay the host's instantly-available balance out to their debit card now (Stripe Instant Payouts). */
@@ -217,14 +214,5 @@ export const actions: Actions = {
 			return fail(400, { message: `Instant payout failed: ${err instanceof Error ? err.message : 'unknown error'}. Standard payouts still arrive on Stripe's normal schedule.` });
 		}
 		return { paidOut: currency };
-	},
-
-	/** Open the host's Stripe Express dashboard (payouts, bank details, tax forms). */
-	dashboard: async ({ locals: { supabase, user } }) => {
-		const { data: host } = await supabase.from('hosts').select('id').eq('user_id', user!.id).single();
-		const { data: secret } = await supabaseAdmin.from('hosts').select('stripe_account_id').eq('id', host!.id).single();
-		if (!secret?.stripe_account_id) return fail(400, { message: 'Connect Stripe first.' });
-		const link = await stripe().accounts.createLoginLink(secret.stripe_account_id);
-		redirect(303, link.url);
 	}
 };

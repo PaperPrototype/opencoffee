@@ -1,10 +1,12 @@
 <script lang="ts">
-	import { ArrowRight, BadgeCheck, CalendarPlus, Check, CircleDollarSign, ExternalLink, Ticket, Users, Zap } from '@lucide/svelte';
+	import { ArrowRight, BadgeCheck, CalendarPlus, Check, CircleDollarSign, ExternalLink, Link2, RefreshCw, Ticket, Users, Zap } from '@lucide/svelte';
+	import { page } from '$app/state';
 	import { enhance } from '$app/forms';
+	import { invalidateAll } from '$app/navigation';
+	import RedirectButton from '#lib/components/RedirectButton.svelte';
 	import SiteHeader from '#lib/components/SiteHeader.svelte';
 	import { categories, coverImage, formatWhen } from '#lib/events.js';
 	import { formatMoney, FEE_PERCENT, ticketFee } from '#lib/money.js';
-	import { payoutCountries } from '#lib/stripe-countries.js';
 	import type { PageProps } from './$types';
 
 	let { data, form }: PageProps = $props();
@@ -16,12 +18,22 @@
 		cancelled: 'border-error text-error'
 	} as const;
 
+	/** "a, b and c" */
+	const list = (items: string[]) =>
+		items.length < 2 ? (items[0] ?? 'a few more details') : `${items.slice(0, -1).join(', ')} and ${items.at(-1)}`;
+	const regionName = (code: string) => new Intl.DisplayNames(['en'], { type: 'region' }).of(code) ?? code;
 	const label = 'font-mono text-[11px] tracking-[0.14em] text-crema uppercase';
 </script>
 
 <svelte:head>
 	<title>Host dashboard — Specialty Coffee Community</title>
 </svelte:head>
+
+<!--
+	Back from Stripe restores this page from the browser's back/forward cache, with whatever it showed
+	before (even the pre-profile form). Reload the data: the Stripe status has likely changed too.
+-->
+<svelte:window onpageshow={(e) => e.persisted && invalidateAll()} />
 
 <div class="grain" aria-hidden="true"></div>
 <SiteHeader />
@@ -87,8 +99,25 @@
 		{@render errorBox()}
 
 		<!-- Payments -->
+		{#if page.url.searchParams.get('stripe') === 'returned'}
+			<div
+				role="status"
+				class="mt-8 flex items-center gap-2 rounded-[10px] border-2 px-4 py-3 text-sm {data.stripe.state === 'active'
+					? 'border-accent bg-accent/10 text-accent'
+					: 'border-secondary bg-secondary/15'}"
+			>
+				{#if data.stripe.state === 'active'}
+					<Check class="size-4" /> Stripe is connected — you can sell paid tickets now.
+				{:else if data.stripe.state === 'reviewing'}
+					<Check class="size-4" /> Thanks — Stripe has your details and is verifying them. We'll email you when paid tickets are unlocked.
+				{:else}
+					Welcome back. Your Stripe setup isn't finished yet — see what's left below.
+				{/if}
+			</div>
+		{/if}
+
 		<section class="mt-8 card-zine p-6">
-			{#if host.stripe_transfers_enabled}
+			{#if data.stripe.state === 'active'}
 				<div class="flex flex-wrap items-center justify-between gap-4">
 					<div class="flex items-center gap-3">
 						<BadgeCheck class="size-6 text-accent" />
@@ -99,9 +128,10 @@
 							</p>
 						</div>
 					</div>
-					<form method="POST" action="?/dashboard">
-						<button class="btn btn-zine bg-base-100 text-sm">Stripe dashboard <ExternalLink class="size-3.5" /></button>
-					</form>
+					<!-- New tab: Stripe's dashboard has no clear way back to this site. -->
+					<a href="/host/stripe/dashboard" target="_blank" rel="noopener" class="btn btn-zine bg-base-100 text-sm">
+						Stripe dashboard <ExternalLink class="size-3.5" /><span class="sr-only">(opens in a new tab)</span>
+					</a>
 				</div>
 				{#if data.balance.length}
 					<div class="mt-5 grid gap-3 border-t-2 border-line pt-5 sm:grid-cols-2">
@@ -127,30 +157,58 @@
 				{#if form?.paidOut}
 					<p role="status" class="mt-3 flex items-center gap-1.5 text-sm text-accent"><Check class="size-4" /> Instant payout started.</p>
 				{/if}
-			{:else}
+				{#if data.stripe.missing.length}
+					<div class="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-[10px] border-2 border-secondary bg-secondary/15 px-4 py-3 text-sm">
+						<span>
+							Stripe needs {list(data.stripe.missing)}{data.stripe.dueBy ? ` by ${new Date(data.stripe.dueBy).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}` : ''} to keep payouts running.
+						</span>
+						<RedirectButton action="?/connect" class="btn btn-zine btn-sm bg-base-100">Update details</RedirectButton>
+					</div>
+				{/if}
+			{:else if data.stripe.state === 'none'}
 				<div class="flex flex-wrap items-start justify-between gap-6">
 					<div class="flex max-w-[56ch] gap-3">
 						<CircleDollarSign class="mt-0.5 size-6 shrink-0 text-primary" />
 						<div>
-							<p class="font-semibold">
-								{host.stripe_details_submitted ? 'Stripe is reviewing your details' : 'Connect Stripe to sell paid tickets'}
-							</p>
+							<p class="font-semibold">Connect Stripe to sell paid tickets</p>
 							<p class="text-sm text-roast">
-								{host.stripe_details_submitted
-									? "This usually takes a few minutes. If Stripe needs anything else, continue onboarding."
-									: 'Free events work without it. Paid ticket money goes straight to your own Stripe account; we keep one small all-in fee per paid ticket.'}
+								Free events work without it. Paid ticket money goes straight to your own Stripe account; we keep one small
+								all-in fee per paid ticket. Payouts go to a bank account in {regionName(data.platformCountry)}.
 							</p>
 						</div>
 					</div>
-					<form method="POST" action="?/connect" class="flex flex-wrap items-center gap-2">
-						{#if !host.stripe_details_submitted}
-							<label class="sr-only" for="country">Country of your bank account</label>
-							<select id="country" name="country" class="select h-10 w-48 field-zine text-sm">
-								{#each payoutCountries as c (c.code)}<option value={c.code} selected={c.code === data.platformCountry}>{c.name}</option>{/each}
-							</select>
-						{/if}
-						<button class="btn btn-primary btn-zine text-sm">{host.stripe_details_submitted ? 'Continue onboarding' : 'Connect Stripe'}</button>
-					</form>
+					<RedirectButton action="?/connect" class="btn btn-primary btn-zine text-sm" pendingLabel="Connecting to Stripe…">
+						Connect Stripe
+					</RedirectButton>
+				</div>
+			{:else}
+				<!-- Connected, but Stripe can't send ticket money yet. -->
+				<div class="flex flex-wrap items-start justify-between gap-6">
+					<div class="flex max-w-[60ch] gap-3">
+						<Link2 class="mt-0.5 size-6 shrink-0 text-accent" />
+						<div>
+							<span class="chip border-accent text-accent">Connected to Stripe</span>
+							{#if data.stripe.state === 'incomplete'}
+								<p class="mt-2 font-semibold">Finish your Stripe setup to sell paid tickets</p>
+								<p class="text-sm text-roast">
+									Your account is linked, but Stripe still needs {list(data.stripe.missing)}. It takes a couple of minutes —
+									free events keep working in the meantime.
+								</p>
+							{:else}
+								<p class="mt-2 font-semibold">Stripe is verifying your details</p>
+								<p class="text-sm text-roast">
+									This usually takes a few minutes. Paid tickets unlock as soon as Stripe approves the account — we'll email you.
+								</p>
+							{/if}
+						</div>
+					</div>
+					<RedirectButton
+						action="?/connect"
+						class="btn btn-zine text-sm {data.stripe.state === 'incomplete' ? 'btn-primary' : 'bg-base-100'}"
+						pendingLabel="Connecting to Stripe…"
+					>
+						<RefreshCw class="size-3.5" /> Reconnect Stripe
+					</RedirectButton>
 				</div>
 			{/if}
 		</section>

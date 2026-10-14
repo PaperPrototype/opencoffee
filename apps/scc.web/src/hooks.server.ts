@@ -63,7 +63,11 @@ const authGuard: Handle = async ({ event, resolve }) => {
 		redirect(303, '/account');
 	}
 
-	return resolve(event);
+	const response = await resolve(event);
+	// Signed-in pages change behind the browser's back (Stripe onboarding, new orders). Without this,
+	// Back from Stripe serves the cached copy of /host — even the pre-profile form.
+	if (isPrivate) response.headers.set('cache-control', 'private, no-store');
+	return response;
 };
 
 export const handle = sequence(supabase, authGuard);

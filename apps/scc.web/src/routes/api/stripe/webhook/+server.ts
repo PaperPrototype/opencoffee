@@ -56,8 +56,10 @@ export const POST: RequestHandler = async ({ request, url }) => {
 			break;
 		}
 
+		// Connect: onboarding progress, verification results, new requirements. Our "callback" for
+		// when a host's account becomes able (or stops being able) to receive ticket money.
 		case 'account.updated':
-			await syncStripeAccount(event.data.object);
+			await syncStripeAccount(event.data.object, url.origin);
 			break;
 	}
 
