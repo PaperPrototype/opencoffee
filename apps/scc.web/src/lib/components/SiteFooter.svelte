@@ -1,5 +1,5 @@
 <script lang="ts">
-	const explore = ['Manifesto', 'Discussions', 'Knowledge', 'Members', 'Events', 'Careers', 'Producers'];
+	const explore = ['Manifesto', 'Discussions', 'Knowledge', 'Events', 'Careers'];
 	const community = ['Code of Conduct', 'Free-to-Join Pledge', 'Moderation', 'Contact'];
 	const finePrint = ['$0 membership fees', '$0 course fees', '0 ads', '0 data sold'];
 </script>
