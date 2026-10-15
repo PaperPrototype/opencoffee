@@ -143,14 +143,14 @@ isOneToOne: false
                   ]
                 },"profiles": {
                   Row: {
-                    "avatar_hue": number | null,"avatar_icon": string | null,"avatar_url": string | null,"bio": string | null,"created_at": string,"display_name": string | null,"id": string,"signup_site": string | null,"updated_at": string,"user_id": string
+                    "avatar_hue": number | null,"avatar_icon": string | null,"avatar_url": string | null,"badge_celebrated_at": string | null,"bio": string | null,"created_at": string,"display_name": string | null,"id": string,"member_number": number,"signup_site": string | null,"updated_at": string,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "avatar_hue"?: number | null,"avatar_icon"?: string | null,"avatar_url"?: string | null,"bio"?: string | null,"created_at"?: string,"display_name"?: string | null,"id"?: string,"signup_site"?: string | null,"updated_at"?: string,"user_id": string
+                    "avatar_hue"?: number | null,"avatar_icon"?: string | null,"avatar_url"?: string | null,"badge_celebrated_at"?: string | null,"bio"?: string | null,"created_at"?: string,"display_name"?: string | null,"id"?: string,"member_number"?: number,"signup_site"?: string | null,"updated_at"?: string,"user_id": string
                   }
                   Update: {
-                    "avatar_hue"?: number | null,"avatar_icon"?: string | null,"avatar_url"?: string | null,"bio"?: string | null,"created_at"?: string,"display_name"?: string | null,"id"?: string,"signup_site"?: string | null,"updated_at"?: string,"user_id"?: string
+                    "avatar_hue"?: number | null,"avatar_icon"?: string | null,"avatar_url"?: string | null,"badge_celebrated_at"?: string | null,"bio"?: string | null,"created_at"?: string,"display_name"?: string | null,"id"?: string,"member_number"?: number,"signup_site"?: string | null,"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
                     
@@ -236,6 +236,20 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"members": {
+                  Row: {
+                    "avatar_hue": number | null,"avatar_icon": string | null,"badge": string | null,"bio": string | null,"created_at": string | null,"display_name": string | null,"id": string | null,"member_number": number | null,"user_id": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                           "avatar_hue"?: number | null,"avatar_icon"?: string | null,"badge"?: never,"bio"?: string | null,"created_at"?: string | null,"display_name"?: string | null,"id"?: string | null,"member_number"?: number | null,"user_id"?: string | null
+                         }
+                        Update: {
+                           "avatar_hue"?: number | null,"avatar_icon"?: string | null,"badge"?: never,"bio"?: string | null,"created_at"?: string | null,"display_name"?: string | null,"id"?: string | null,"member_number"?: number | null,"user_id"?: string | null
+                         }
+                        Relationships: [
+                    
+                  ]
                 },"ticket_type_availability": {
                   Row: {
                     "event_id": string | null,"sold": number | null,"taken": number | null,"ticket_type_id": string | null
@@ -289,6 +303,14 @@ isOneToOne: false
                            },
 "is_host":
 { Args: { "p_host_id": string }; Returns: boolean
+                           },
+"member_badge":
+{ Args: { "p_member_number": number }; Returns: string
+                           },
+"member_stats":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "latest_number": number,"total": number
+            }[]
                            },
 "void_order":
 { Args: { "p_order_id": string,"p_refunded": boolean }; Returns: boolean

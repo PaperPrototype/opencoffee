@@ -8,7 +8,7 @@ const iconIds = new Set(avatarIcons.map((icon) => icon.id));
 export const load: PageServerLoad = async ({ locals: { supabase, user } }) => {
 	const { data: profile, error: err } = await supabase
 		.from('profiles')
-		.select('display_name, bio, avatar_icon, avatar_hue, signup_site, created_at')
+		.select('display_name, bio, avatar_icon, avatar_hue, signup_site, created_at, member_number')
 		.eq('user_id', user!.id)
 		.single();
 	if (err) error(500, 'Could not load your profile.');

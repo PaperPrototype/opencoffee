@@ -7,8 +7,8 @@
 	const signedIn = $derived(!!page.data.session);
 
 	/** Sections that exist so far; the rest still point home. */
-	const links: Record<string, string> = { Events: '/events', 'For Organizers': '/host' };
-	const nav = ['Events', 'For Organizers', 'Discussions', 'Knowledge', 'Jobs', 'For Trainers', 'Manifesto'];
+	const links: Record<string, string> = { Events: '/events', 'For Organizers': '/host', Members: '/members' };
+	const nav = ['Events', 'For Organizers', 'Members', 'Discussions', 'Knowledge', 'Jobs', 'For Trainers', 'Manifesto'];
 	const ticker = [
 		'☕ Free to join',
 		'Open knowledge',

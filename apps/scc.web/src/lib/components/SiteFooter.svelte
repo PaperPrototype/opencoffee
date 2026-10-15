@@ -1,5 +1,6 @@
 <script lang="ts">
-	const explore = ['Manifesto', 'Discussions', 'Knowledge', 'Events', 'Careers'];
+	const explore = ['Manifesto', 'Discussions', 'Knowledge', 'Members', 'Events', 'Careers'];
+	const exploreLinks: Record<string, string> = { Events: '/events', Members: '/members' };
 	const community = ['Code of Conduct', 'Free-to-Join Pledge', 'Moderation', 'Contact'];
 	const finePrint = ['$0 membership fees', '$0 course fees', '0 ads', '0 data sold'];
 </script>
@@ -21,7 +22,7 @@
 			<h4 class="eyebrow text-ember">Explore</h4>
 			<ul class="mt-4 space-y-2.5">
 				{#each explore as item (item)}
-					<li><a href={item === 'Events' ? '/events' : '/'} class="text-[15px] text-neutral-content/80 hover:text-primary">{item}</a></li>
+					<li><a href={exploreLinks[item] ?? '/'} class="text-[15px] text-neutral-content/80 hover:text-primary">{item}</a></li>
 				{/each}
 			</ul>
 		</div>

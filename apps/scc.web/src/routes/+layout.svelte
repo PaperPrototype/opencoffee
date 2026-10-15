@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import { invalidate } from '$app/navigation';
 	import favicon from '#lib/assets/favicon.svg';
+	import Celebration from '#lib/components/Celebration.svelte';
 	import type { LayoutProps } from './$types';
 
 	let { data, children }: LayoutProps = $props();
@@ -23,3 +24,8 @@
 </svelte:head>
 
 {@render children()}
+
+<!-- First visit after signing up as one of the first 10 / 100 / 1,000 members: confetti, once. -->
+{#if data.celebration}
+	<Celebration {...data.celebration} />
+{/if}

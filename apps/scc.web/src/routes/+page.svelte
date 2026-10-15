@@ -14,7 +14,6 @@
 		Pin,
 		Search,
 		Send,
-		Sprout,
 		Users
 	} from '@lucide/svelte';
 	import SiteFooter from '#lib/components/SiteFooter.svelte';
@@ -61,10 +60,8 @@
 	const community = [
 		{ icon: MessagesSquare, title: 'Discussions', body: 'Searchable, permanent threads. No Discord memory-hole.', stat: '3,217 threads' },
 		{ icon: BookOpen, title: 'Knowledge Base', body: 'Free, curated guides from espresso to green buying.', stat: '186 guides' },
-		{ icon: Users, title: 'Members', body: 'Find mentors, peers, and people near you.', stat: '12,483 members' },
 		{ icon: CalendarDays, title: 'Events', body: 'Every coffee event on Earth, one calendar.', stat: '312 listed · 58% free' },
-		{ icon: Briefcase, title: 'Careers', body: 'Salary transparency and real career maps.', stat: '412 salary reports' },
-		{ icon: Sprout, title: 'Producer Voices', body: 'Two-way connection with the people who grow it.', stat: '27 producer AMAs' }
+		{ icon: Briefcase, title: 'Careers', body: 'Salary transparency and real career maps.', stat: '412 salary reports' }
 	];
 
 	const status = {
@@ -322,7 +319,7 @@
 			Free to join, community-driven, open knowledge — the events just gave us a reason to finally
 			gather in one place.
 		</p>
-		<div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+		<div class="mt-12 grid gap-6 sm:grid-cols-2">
 			{#each community as item (item.title)}
 				<a href="/" class="card-zine card-zine-hover flex flex-col p-7">
 					<item.icon class="size-7 text-primary" strokeWidth={1.75} />

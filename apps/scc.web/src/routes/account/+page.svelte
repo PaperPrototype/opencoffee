@@ -3,6 +3,8 @@
 	import { Avatar, AvatarPicker } from 'avatars';
 	import { enhance } from '$app/forms';
 	import { page } from '$app/state';
+	import { badgeFor, formatMemberNumber } from '#lib/badges.js';
+	import MemberBadge from '#lib/components/MemberBadge.svelte';
 	import SiteHeader from '#lib/components/SiteHeader.svelte';
 	import type { PageProps } from './$types';
 
@@ -36,7 +38,12 @@
 			</h1>
 		</div>
 	</div>
-	<p class="mt-3 font-mono text-[13px] text-crema">{data.email} · member since {memberSince}</p>
+	<p class="mt-3 font-mono text-[13px] text-crema">
+		{data.email} · <a href="/members/{data.profile.member_number}" class="underline decoration-primary underline-offset-4 hover:text-primary">member {formatMemberNumber(data.profile.member_number)}</a> since {memberSince}
+	</p>
+	{#if badgeFor(data.profile.member_number)}
+		<MemberBadge badge={badgeFor(data.profile.member_number)?.id} class="mt-3" />
+	{/if}
 
 	{#if page.url.searchParams.get('updated') === 'password'}
 		<div role="status" class="mt-6 flex items-center gap-2 rounded-[10px] border-2 border-accent bg-accent/10 px-4 py-3 text-sm text-accent">
