@@ -1,14 +1,14 @@
 <script lang="ts">
-	import { CalendarPlus, Check, Ticket } from '@lucide/svelte';
-	import { Avatar, AvatarPicker } from 'avatars';
-	import { enhance } from '$app/forms';
+	import { ArrowRight, CalendarPlus, Check, Pencil, Sparkles, Ticket } from '@lucide/svelte';
+	import { Avatar } from 'avatars';
 	import { page } from '$app/state';
 	import { badgeFor, formatMemberNumber } from '#lib/badges.js';
+	import CoffeeCv from '#lib/components/CoffeeCv.svelte';
 	import MemberBadge from '#lib/components/MemberBadge.svelte';
 	import SiteHeader from '#lib/components/SiteHeader.svelte';
 	import type { PageProps } from './$types';
 
-	let { data, form }: PageProps = $props();
+	let { data }: PageProps = $props();
 
 	const memberSince = $derived(
 		new Date(data.profile.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
@@ -51,30 +51,41 @@
 		</div>
 	{/if}
 
-	<form method="POST" action="?/profile" class="mt-10 card-zine p-8 shadow-zine-lg" use:enhance={() => async ({ update }) => update({ reset: false })}>
-		<h2 class="text-2xl font-medium">Profile</h2>
-		<p class="mt-1 text-sm text-roast">Shown to other members.</p>
+	{#if !data.profile.onboarded_at}
+		<a href="/welcome" class="mt-10 flex items-center gap-4 card-zine card-zine-hover bg-secondary p-5">
+			<Sparkles class="size-6 shrink-0" />
+			<span class="min-w-0 flex-1">
+				<span class="block font-semibold">Finish your Coffee CV</span>
+				<span class="text-sm text-roast">Four quick steps so members, hosts and employers know who you are.</span>
+			</span>
+			<ArrowRight class="size-5 shrink-0" />
+		</a>
+	{/if}
 
-		{#if form?.message}
-			<div role="alert" class="mt-5 rounded-[10px] border-2 border-error bg-error/10 px-4 py-3 text-sm text-error">{form.message}</div>
-		{/if}
-
-		<div class="mt-6 border-b-2 border-line pb-6">
-			<AvatarPicker userId={data.userId} icon={data.profile.avatar_icon} hue={data.profile.avatar_hue} />
+	<section class="mt-10">
+		<div class="mb-4 flex items-end justify-between gap-3">
+			<h2 class="text-2xl font-medium">Your Coffee CV</h2>
+			<a href="/welcome" class="link-zine text-sm"><Pencil class="size-4" /> Edit</a>
 		</div>
-
-		<fieldset class="fieldset mt-4 gap-1">
-			<label class="fieldset-legend font-mono text-[11px] font-normal tracking-[0.14em] text-crema uppercase" for="display_name">Display name</label>
-			<input id="display_name" name="display_name" maxlength="80" class="input h-12 w-full field-zine" defaultValue={data.profile.display_name ?? ''} />
-			<label class="fieldset-legend mt-3 font-mono text-[11px] font-normal tracking-[0.14em] text-crema uppercase" for="bio">Bio</label>
-			<textarea id="bio" name="bio" maxlength="1000" class="textarea h-28 w-full field-zine" placeholder="Barista, roaster, home brewer…" defaultValue={data.profile.bio ?? ''}></textarea>
-		</fieldset>
-
-		<div class="mt-6 flex items-center gap-4">
-			<button type="submit" class="btn btn-primary btn-zine">Save profile</button>
-			{#if form?.saved}<span class="flex items-center gap-1.5 text-sm text-accent"><Check class="size-4" /> Saved</span>{/if}
-		</div>
-	</form>
+		<CoffeeCv
+			userId={data.userId}
+			memberNumber={data.profile.member_number}
+			name={data.profile.display_name}
+			headline={data.profile.headline}
+			location={data.profile.location}
+			avatarIcon={data.profile.avatar_icon}
+			avatarHue={data.profile.avatar_hue}
+			bio={data.profile.bio}
+			roles={data.profile.roles}
+			yearsInCoffee={data.profile.years_in_coffee}
+			skills={data.profile.skills}
+			experience={data.profile.experience}
+			availability={data.profile.availability}
+			website={data.profile.website}
+			instagram={data.profile.instagram}
+			strip={['Public Coffee CV', `Member since ${memberSince}`]}
+		/>
+	</section>
 
 	<div class="mt-8 grid gap-4 sm:grid-cols-2">
 		<a href="/account/tickets" class="card-zine card-zine-hover flex items-center gap-4 p-5">

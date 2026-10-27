@@ -203,19 +203,42 @@ export const foundingClasses = [
 	{
 		name: 'The Founding 100',
 		places: '100',
-		blurb: 'names written into the ledger, permanently. The scarcest mark we will ever issue.'
+		blurb: 'Names written into the ledger, permanently. The scarcest mark we will ever issue.'
 	},
 	{
 		name: 'The First 1,000',
 		places: '1,000',
-		blurb: 'founding member badge + name in the founding registry.'
+		blurb: 'A founding member badge, and your name in the founding registry.'
 	},
 	{
 		name: 'The First 10,000',
 		places: '10,000',
 		blurb:
-			'founding badge, permanent. When this community serves its first million people, 10,000 can say they were there at the beginning.'
+			'A permanent founding badge. When this community serves its first million people, 10,000 can say they were there at the beginning.'
 	}
 ];
 
 export const pledges = ['Free to join', 'Community-driven', 'Open knowledge'];
+
+/** The public example Coffee CV (/members/example): what a finished profile looks like, badge and all. */
+export const exampleCv = {
+	userId: 'example-daniel-ortega',
+	memberNumber: 41,
+	name: 'Daniel Ortega',
+	headline: 'Champion barista & coffee educator',
+	location: 'Medellín, Colombia',
+	avatarIcon: null,
+	avatarHue: 18,
+	bio: 'I keep the bar organised during busy service, make sure every drink goes out consistent, and help newer baristas feel confident on shift.',
+	roles: ['head_barista', 'educator', 'competitor', 'judge'],
+	yearsInCoffee: 11,
+	skills: ['Espresso workflow', 'Sensory calibration', 'Latte art', 'Team training', 'Competition coaching'],
+	experience: [
+		{ role: 'Head barista & trainer', place: 'Café Pergamino · Medellín', detail: 'Runs the morning bar and the new-starter programme; six baristas trained to competition level.' },
+		{ role: 'National Barista Champion', place: 'Colombia · 2016', detail: 'Signature drink built around a washed Caturra from Huila.' },
+		{ role: 'Certified sensory judge', place: 'Regional throwdowns · 2018–now' }
+	],
+	availability: 'open',
+	website: null,
+	instagram: null
+} as const;

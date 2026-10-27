@@ -128,7 +128,10 @@
 												{m.display_name || `Member ${formatMemberNumber(m.member_number!)}`}
 												{#if m.user_id === data.me}<span class="ml-1 font-mono text-[11px] font-normal text-crema uppercase">· you</span>{/if}
 											</p>
-											<p class="font-mono text-xs text-crema">{formatMemberNumber(m.member_number!)} · joined {joined(m.created_at)}</p>
+											{#if m.headline}<p class="truncate text-sm font-medium text-roast">{m.headline}</p>{/if}
+											<p class="font-mono text-xs text-crema">
+												{formatMemberNumber(m.member_number!)} · {m.location ? m.location : `joined ${joined(m.created_at)}`}
+											</p>
 										</div>
 									</div>
 									{#if m.bio}<p class="mt-3 line-clamp-2 text-sm text-roast">{m.bio}</p>{/if}

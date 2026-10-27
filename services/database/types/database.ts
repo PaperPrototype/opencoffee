@@ -143,14 +143,14 @@ isOneToOne: false
                   ]
                 },"profiles": {
                   Row: {
-                    "avatar_hue": number | null,"avatar_icon": string | null,"avatar_url": string | null,"badge_celebrated_at": string | null,"bio": string | null,"created_at": string,"display_name": string | null,"id": string,"member_number": number,"signup_site": string | null,"updated_at": string,"user_id": string
+                    "availability": string | null,"country_code": string | null,"experience": Json,"headline": string | null,"instagram": string | null,"interests": string[],"location": string | null,"onboarded_at": string | null,"roles": string[],"skills": string[],"website": string | null,"years_in_coffee": number | null,"avatar_hue": number | null,"avatar_icon": string | null,"avatar_url": string | null,"badge_celebrated_at": string | null,"bio": string | null,"created_at": string,"display_name": string | null,"id": string,"member_number": number,"signup_site": string | null,"updated_at": string,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "avatar_hue"?: number | null,"avatar_icon"?: string | null,"avatar_url"?: string | null,"badge_celebrated_at"?: string | null,"bio"?: string | null,"created_at"?: string,"display_name"?: string | null,"id"?: string,"member_number"?: number,"signup_site"?: string | null,"updated_at"?: string,"user_id": string
+                    "availability"?: string | null,"country_code"?: string | null,"experience"?: Json,"headline"?: string | null,"instagram"?: string | null,"interests"?: string[],"location"?: string | null,"onboarded_at"?: string | null,"roles"?: string[],"skills"?: string[],"website"?: string | null,"years_in_coffee"?: number | null,"avatar_hue"?: number | null,"avatar_icon"?: string | null,"avatar_url"?: string | null,"badge_celebrated_at"?: string | null,"bio"?: string | null,"created_at"?: string,"display_name"?: string | null,"id"?: string,"member_number"?: number,"signup_site"?: string | null,"updated_at"?: string,"user_id": string
                   }
                   Update: {
-                    "avatar_hue"?: number | null,"avatar_icon"?: string | null,"avatar_url"?: string | null,"badge_celebrated_at"?: string | null,"bio"?: string | null,"created_at"?: string,"display_name"?: string | null,"id"?: string,"member_number"?: number,"signup_site"?: string | null,"updated_at"?: string,"user_id"?: string
+                    "availability"?: string | null,"country_code"?: string | null,"experience"?: Json,"headline"?: string | null,"instagram"?: string | null,"interests"?: string[],"location"?: string | null,"onboarded_at"?: string | null,"roles"?: string[],"skills"?: string[],"website"?: string | null,"years_in_coffee"?: number | null,"avatar_hue"?: number | null,"avatar_icon"?: string | null,"avatar_url"?: string | null,"badge_celebrated_at"?: string | null,"bio"?: string | null,"created_at"?: string,"display_name"?: string | null,"id"?: string,"member_number"?: number,"signup_site"?: string | null,"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
                     
@@ -238,14 +238,14 @@ isOneToOne: false
                   ]
                 },"members": {
                   Row: {
-                    "avatar_hue": number | null,"avatar_icon": string | null,"badge": string | null,"bio": string | null,"created_at": string | null,"display_name": string | null,"id": string | null,"member_number": number | null,"user_id": string | null
+                    "availability": string | null,"country_code": string | null,"experience": Json | null,"headline": string | null,"instagram": string | null,"location": string | null,"roles": string[] | null,"skills": string[] | null,"website": string | null,"years_in_coffee": number | null,"avatar_hue": number | null,"avatar_icon": string | null,"badge": string | null,"bio": string | null,"created_at": string | null,"display_name": string | null,"id": string | null,"member_number": number | null,"user_id": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                           "avatar_hue"?: number | null,"avatar_icon"?: string | null,"badge"?: never,"bio"?: string | null,"created_at"?: string | null,"display_name"?: string | null,"id"?: string | null,"member_number"?: number | null,"user_id"?: string | null
+                           "availability"?: string | null,"country_code"?: string | null,"experience"?: Json | null,"headline"?: string | null,"instagram"?: string | null,"location"?: string | null,"roles"?: string[] | null,"skills"?: string[] | null,"website"?: string | null,"years_in_coffee"?: number | null,"avatar_hue"?: number | null,"avatar_icon"?: string | null,"badge"?: never,"bio"?: string | null,"created_at"?: string | null,"display_name"?: string | null,"id"?: string | null,"member_number"?: number | null,"user_id"?: string | null
                          }
                         Update: {
-                           "avatar_hue"?: number | null,"avatar_icon"?: string | null,"badge"?: never,"bio"?: string | null,"created_at"?: string | null,"display_name"?: string | null,"id"?: string | null,"member_number"?: number | null,"user_id"?: string | null
+                           "availability"?: string | null,"country_code"?: string | null,"experience"?: Json | null,"headline"?: string | null,"instagram"?: string | null,"location"?: string | null,"roles"?: string[] | null,"skills"?: string[] | null,"website"?: string | null,"years_in_coffee"?: number | null,"avatar_hue"?: number | null,"avatar_icon"?: string | null,"badge"?: never,"bio"?: string | null,"created_at"?: string | null,"display_name"?: string | null,"id"?: string | null,"member_number"?: number | null,"user_id"?: string | null
                          }
                         Relationships: [
                     

@@ -1,4 +1,5 @@
 import { error, redirect } from '@sveltejs/kit';
+import { readExperience } from 'profile';
 import { type ListedEvent, listingSelect } from '#lib/events.js';
 import { withGoing } from '#lib/server/events.js';
 import type { PageServerLoad } from './$types';
@@ -12,7 +13,9 @@ export const load: PageServerLoad = async ({ params, url, locals: { supabase, us
 
 	const { data: member } = await supabase
 		.from('members')
-		.select('user_id, member_number, display_name, bio, avatar_icon, avatar_hue, created_at, badge')
+		.select(
+			'user_id, member_number, display_name, bio, avatar_icon, avatar_hue, created_at, badge, headline, location, roles, years_in_coffee, skills, experience, availability, website, instagram'
+		)
 		.eq('member_number', number)
 		.maybeSingle();
 	if (!member) error(404, 'Member not found.');
@@ -32,5 +35,10 @@ export const load: PageServerLoad = async ({ params, url, locals: { supabase, us
 		events = await withGoing(supabase, data ?? []);
 	}
 
-	return { member, host, events, isMe: member.user_id === user.id };
+	return {
+		member: { ...member, experience: readExperience(member.experience) },
+		host,
+		events,
+		isMe: member.user_id === user.id
+	};
 };

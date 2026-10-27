@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { ArrowRight, CalendarDays, Pencil } from '@lucide/svelte';
-	import { Avatar } from 'avatars';
+	import { ArrowRight, CalendarDays, Check, Pencil } from '@lucide/svelte';
+	import { page } from '$app/state';
 	import { badgeById, formatMemberNumber } from '#lib/badges.js';
+	import CoffeeCv from '#lib/components/CoffeeCv.svelte';
 	import MemberBadge from '#lib/components/MemberBadge.svelte';
 	import SiteFooter from '#lib/components/SiteFooter.svelte';
 	import SiteHeader from '#lib/components/SiteHeader.svelte';
@@ -28,23 +29,42 @@
 <main class="mx-auto max-w-[1100px] px-6 py-14">
 	<a href="/members" class="font-mono text-xs tracking-[0.12em] text-crema uppercase hover:text-primary">← All members</a>
 
-	<section class="mt-6 flex flex-col gap-8 card-zine p-8 shadow-zine-lg md:flex-row md:items-center">
-		<Avatar userId={m.user_id!} icon={m.avatar_icon} hue={m.avatar_hue} size={112} class="border-2 border-espresso shadow-zine-sm" />
-		<div class="min-w-0 flex-1">
-			<p class="eyebrow">Member {number}</p>
-			<h1 class="display mt-1 text-[40px] leading-tight font-semibold tracking-[-0.02em] break-words">{name}</h1>
-			<p class="mt-1 font-mono text-[13px] text-crema">Joined {since}</p>
-			{#if m.bio}<p class="mt-4 max-w-[60ch] whitespace-pre-line text-roast">{m.bio}</p>{/if}
-			{#if data.isMe}
-				<a href="/account" class="link-zine mt-4 text-sm"><Pencil class="size-4" /> Edit your profile</a>
-			{/if}
+	{#if data.isMe && page.url.searchParams.has('saved')}
+		<div role="status" class="mt-6 flex items-center gap-2 rounded-[10px] border-2 border-accent bg-accent/10 px-4 py-3 text-sm text-accent">
+			<Check class="size-4" /> Your Coffee CV is saved. This is how other members see it.
 		</div>
-		{#if badge}
-			<div class="flex flex-col items-center gap-2 text-center md:w-44">
-				<MemberBadge badge={badge.id} size="medal" class="w-32" />
-				<p class="text-sm text-roast">{badge.blurb.replace(/^one/, 'One')}</p>
-			</div>
-		{/if}
+	{/if}
+
+	<section class="mt-6 grid items-start gap-8 lg:grid-cols-[1.3fr_0.7fr] lg:gap-12">
+		<CoffeeCv
+			userId={m.user_id!}
+			memberNumber={m.member_number!}
+			name={m.display_name}
+			headline={m.headline}
+			location={m.location}
+			avatarIcon={m.avatar_icon}
+			avatarHue={m.avatar_hue}
+			bio={m.bio}
+			roles={m.roles ?? []}
+			yearsInCoffee={m.years_in_coffee}
+			skills={m.skills ?? []}
+			experience={m.experience}
+			availability={m.availability}
+			website={m.website}
+			instagram={m.instagram}
+			strip={['Public Coffee CV', `Joined ${since}`]}
+		/>
+		<aside class="grid gap-5">
+			{#if badge}
+				<div class="grid justify-items-center gap-4 card-zine p-5 text-center">
+					<MemberBadge badge={badge.id} size="medal" number={m.member_number!} class="w-full max-w-72" />
+					<p class="text-sm text-roast">{name} is {badge.blurb} of Specialty Coffee Community.</p>
+				</div>
+			{/if}
+			{#if data.isMe}
+				<a href="/welcome" class="btn btn-primary btn-zine"><Pencil class="size-4" /> Edit your Coffee CV</a>
+			{/if}
+		</aside>
 	</section>
 
 	{#if data.host}

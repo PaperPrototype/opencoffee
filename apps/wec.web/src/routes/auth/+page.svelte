@@ -36,6 +36,8 @@
 		signup: { eyebrow: 'Free · One account for both', title: 'Create an SCC account', button: 'Create SCC account' },
 		forgot: { eyebrow: 'SCC account recovery', title: 'Reset your password', button: 'Send reset link' }
 	};
+	/** What joining looks like, start to finish. */
+	const journey = ['Create your account', 'Confirm your email', 'Build your Coffee CV'];
 	const label = 'fieldset-legend text-[10px] font-extrabold tracking-[0.25em] text-sand/50 uppercase';
 </script>
 
@@ -52,7 +54,7 @@
 			<h1 class="mt-4 text-3xl font-extrabold tracking-tight">Check your inbox</h1>
 			<p class="mt-3 text-[15px] text-sand/70">
 				{form.sent === 'signup'
-					? 'Confirm your new Specialty Coffee Community account — we sent a link to'
+					? 'Confirm your new Specialty Coffee Community account, then build your Coffee CV — we sent a link to'
 					: 'If an account exists for that email, we sent a reset link to'}
 				<b class="text-sand">{form.email}</b>.
 			</p>
@@ -73,13 +75,6 @@
 				<a href={PUBLIC_SCC_URL} class="font-semibold underline underline-offset-2">specialtycoffeecommunity.com</a>.
 			</p>
 		</div>
-
-		{#if mode !== 'forgot'}
-			<div role="tablist" class="tabs-box mt-4 tabs grid grid-cols-2 rounded-xl bg-base-100 shadow-board">
-				<a role="tab" href="/auth?mode=signin{nextQuery}" class="tab rounded-lg text-sm font-semibold {mode === 'signin' ? 'tab-active' : ''}">Sign in</a>
-				<a role="tab" href="/auth?mode=signup{nextQuery}" class="tab rounded-lg text-sm font-semibold {mode === 'signup' ? 'tab-active' : ''}">New to SCC</a>
-			</div>
-		{/if}
 
 		<form method="POST" action="?/{mode}{nextQuery}" class="mt-6 card-board p-8" use:enhance={submit}>
 			{#if form && 'message' in form}
@@ -126,9 +121,26 @@
 				{copy[mode].button}
 			</button>
 
-			{#if mode === 'forgot'}
-				<p class="mt-5 text-center text-sm"><a href="/auth" class="text-cinnamon-light hover:text-sand">Back to sign in</a></p>
-			{/if}
+			<p class="mt-5 border-t border-sand/10 pt-5 text-center text-sm text-sand/60">
+				{#if mode === 'signin'}
+					New to SCC? <a href="/auth?mode=signup{nextQuery}" class="font-semibold text-cinnamon-light hover:text-sand">Create a free account</a>
+				{:else if mode === 'signup'}
+					Already have an SCC account? <a href="/auth?mode=signin{nextQuery}" class="font-semibold text-cinnamon-light hover:text-sand">Sign in</a>
+				{:else}
+					<a href="/auth" class="text-cinnamon-light hover:text-sand">Back to sign in</a>
+				{/if}
+			</p>
 		</form>
+
+		{#if mode === 'signup'}
+			<ol class="mt-8 grid gap-3 sm:grid-cols-3">
+				{#each journey as item, i (item)}
+					<li class="rounded-xl bg-base-100/60 p-4 ring-1 ring-sand/10">
+						<span class="eyebrow">Step {i + 1}</span>
+						<span class="mt-1 block text-sm font-semibold">{item}</span>
+					</li>
+				{/each}
+			</ol>
+		{/if}
 	{/if}
 </main>

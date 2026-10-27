@@ -20,12 +20,14 @@
 </script>
 
 <svelte:head>
-	<link rel="icon" href={favicon} />
+	<link rel="icon" href={favicon} type="image/svg+xml" />
+	<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+	<meta name="theme-color" content="#faf5ec" />
 </svelte:head>
 
 {@render children()}
 
-<!-- First visit after signing up as one of the first 10 / 100 / 1,000 members: confetti, once. -->
+<!-- First visit after signing up as one of the first 100 / 1,000 / 10,000 members: confetti, once. -->
 {#if data.celebration}
 	<Celebration {...data.celebration} />
 {/if}

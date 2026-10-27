@@ -38,6 +38,7 @@
 		"canvas-confetti": "1.9.4",
 		"database": "workspace:*",
 		"nodemailer": "10.1.0",
+		"profile": "workspace:*",
 		"qrcode": "1.5.4",
 		"stripe": "23.0.0"
 	}

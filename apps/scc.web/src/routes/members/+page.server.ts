@@ -1,4 +1,4 @@
-import { badgeFor, badges } from '#lib/badges.js';
+import { badgeFor, badgeRuns, badges } from '#lib/badges.js';
 import type { PageServerLoad } from './$types';
 
 const PAGE_SIZE = 48;
@@ -8,13 +8,7 @@ export const load: PageServerLoad = async ({ url, locals: { supabase, user } }) 
 	const total = stats?.total ?? 0;
 	const latest = stats?.latest_number ?? 0;
 
-	// How far along each badge run is: #1–10, #11–100, #101–1000.
-	const runs = badges.map((b, i) => {
-		const from = i === 0 ? 1 : badges[i - 1].limit + 1;
-		const claimed = Math.max(0, Math.min(latest, b.limit) - from + 1);
-		const size = b.limit - from + 1;
-		return { ...b, from, size, claimed, left: size - claimed };
-	});
+	const runs = badgeRuns(latest);
 
 	// What someone joining right now would get (signed-out pitch).
 	const next = { number: latest + 1, badge: badgeFor(latest + 1)?.label ?? null };
@@ -29,7 +23,9 @@ export const load: PageServerLoad = async ({ url, locals: { supabase, user } }) 
 
 	let query = supabase
 		.from('members')
-		.select('id, user_id, member_number, display_name, bio, avatar_icon, avatar_hue, created_at, badge', { count: 'exact' })
+		.select('id, user_id, member_number, display_name, headline, location, bio, avatar_icon, avatar_hue, created_at, badge', {
+			count: 'exact'
+		})
 		.order('member_number', { ascending: sort === 'first' })
 		.range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
 	if (q) query = query.ilike('display_name', `%${q.replace(/[%_\\]/g, (c) => `\\${c}`)}%`);

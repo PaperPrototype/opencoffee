@@ -62,7 +62,7 @@
 			class="relative w-full max-w-md card-zine p-8 text-center shadow-zine-lg"
 			in:pop
 		>
-			<MemberBadge badge={b.id} size="medal" class="w-32 animate-[spin_1.1s_cubic-bezier(.2,.8,.2,1)_1] motion-reduce:animate-none" />
+			<MemberBadge badge={b.id} size="medal" number={memberNumber} class="mx-auto w-60 animate-[spin_1.1s_cubic-bezier(.2,.8,.2,1)_1] motion-reduce:animate-none" />
 			<p class="eyebrow mt-6">Welcome{name ? `, ${name}` : ''}</p>
 			<h2 id="celebration-title" class="display mt-2 text-[40px] leading-[1.05] font-semibold tracking-[-0.02em]">
 				You're member <span class="text-primary">{formatMemberNumber(memberNumber)}</span>

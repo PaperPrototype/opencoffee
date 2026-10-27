@@ -1,6 +1,9 @@
+import { fail } from '@sveltejs/kit';
+import { badgeFor, badgeRuns } from '#lib/badges.js';
 import { formatDateLong, listingSelect, place, priceLabel, toTicketEvent } from '#lib/events.js';
+import { sendContactMessage } from '#lib/server/email.js';
 import { withGoing } from '#lib/server/events.js';
-import type { PageServerLoad } from './$types';
+import type { Actions, PageServerLoad } from './$types';
 
 const DAY = 86_400_000;
 
@@ -14,7 +17,7 @@ export const load: PageServerLoad = async ({ locals: { supabase } }) => {
 	const upcoming = () =>
 		supabase.from('events').select(listingSelect).eq('status', 'published').gte('ends_at', now.toISOString()).order('starts_at');
 
-	const [{ data: soon }, { data: festivals }, { count: weekCount }] = await Promise.all([
+	const [{ data: soon }, { data: festivals }, { count: weekCount }, { data: stats }] = await Promise.all([
 		upcoming().limit(12),
 		upcoming().eq('category', 'festival').limit(7),
 		supabase
@@ -22,7 +25,8 @@ export const load: PageServerLoad = async ({ locals: { supabase } }) => {
 			.select('id', { count: 'exact', head: true })
 			.eq('status', 'published')
 			.gte('ends_at', now.toISOString())
-			.lt('starts_at', weekOut)
+			.lt('starts_at', weekOut),
+		supabase.rpc('member_stats').single()
 	]);
 
 	const listed = await withGoing(supabase, [...(soon ?? []), ...(festivals ?? [])]);
@@ -33,9 +37,11 @@ export const load: PageServerLoad = async ({ locals: { supabase } }) => {
 	const thisWeek = soonCards.filter((e) => e.starts_at < weekOut).map(toTicketEvent);
 	const festivalRows = withCount(festivals ?? []);
 
+	// Founding classes: real progress, and the number the next person to join will get.
+	const latest = stats?.latest_number ?? 0;
+
 	return {
-		// Hero fan: the next three events, most popular in front.
-		heroStack: soonCards.slice(0, 3).sort((a, b) => a.going - b.going).map(toTicketEvent),
+		members: { total: stats?.total ?? 0, runs: badgeRuns(latest), next: { number: latest + 1, badge: badgeFor(latest + 1)?.id ?? null } },
 		thisWeek,
 		weekCount: weekCount ?? 0,
 		festivals: festivalRows.slice(0, 3).map((e) => ({
@@ -52,4 +58,25 @@ export const load: PageServerLoad = async ({ locals: { supabase } }) => {
 			label: `${e.title} · ${new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', timeZone: e.timezone }).format(new Date(e.starts_at))}`
 		}))
 	};
+};
+
+export const actions: Actions = {
+	/** "Say hello": emails the founder. */
+	contact: async ({ request }) => {
+		const form = await request.formData();
+		// Honeypot: people never see this field, bots fill it in.
+		if (form.get('company')) return { sent: true };
+		const name = String(form.get('name') ?? '').trim().slice(0, 120);
+		const email = String(form.get('email') ?? '').trim().slice(0, 254);
+		const body = String(form.get('message') ?? '').trim().slice(0, 5000);
+		if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return fail(400, { contactError: 'Add an email so the founder can write back.', name, email, body });
+		if (body.length < 2) return fail(400, { contactError: 'Write a message first.', name, email, body });
+		try {
+			await sendContactMessage({ name, email, body });
+		} catch (err) {
+			console.error('Contact message failed', err);
+			return fail(500, { contactError: 'That didn’t send. Email hello@specialtycoffeecommunity.com directly.', name, email, body });
+		}
+		return { sent: true };
+	}
 };

@@ -13,6 +13,7 @@ type Mail = {
 	subject: string;
 	html: string;
 	text: string;
+	replyTo?: string;
 	attachments?: { filename: string; content: Buffer | string; contentType: string; cid?: string }[];
 };
 
@@ -214,4 +215,19 @@ export async function sendHostPaymentsReady(userId: string, hostName: string, or
 	} catch (err) {
 		console.error(`Host ready email failed for ${userId}`, err);
 	}
+}
+
+/** The homepage "Say hello" form: delivered to the founder's inbox, replies go straight to the sender. */
+export async function sendContactMessage(message: { name: string; email: string; body: string }) {
+	const from = message.name || message.email;
+	await send({
+		to: 'hello@specialtycoffeecommunity.com',
+		replyTo: message.email,
+		subject: `Hello from ${from}`,
+		text: `${message.body}\n\n— ${from} <${message.email}>`,
+		html: layout(
+			`<p style="margin:0 0 16px;white-space:pre-line">${esc(message.body)}</p><p style="margin:0;color:#8c6a4f">— ${esc(from)} &lt;${esc(message.email)}&gt;</p>`,
+			message.body.slice(0, 90)
+		)
+	});
 }

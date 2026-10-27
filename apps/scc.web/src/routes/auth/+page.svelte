@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { MailCheck } from '@lucide/svelte';
+	import { ArrowRight, Check, MailCheck } from '@lucide/svelte';
 	import { enhance } from '$app/forms';
 	import { page } from '$app/state';
 	import SiteHeader from '#lib/components/SiteHeader.svelte';
@@ -30,144 +30,173 @@
 	};
 
 	const copy = {
-		signin: { eyebrow: 'Welcome back', title: 'Sign in', button: 'Sign in' },
-		signup: { eyebrow: 'Free to join', title: 'Join the community', button: 'Join free' },
-		forgot: { eyebrow: 'Happens to everyone', title: 'Reset your password', button: 'Send reset link' }
+		signin: {
+			eyebrow: 'Welcome back',
+			title: ['Good to see you ', 'again.'],
+			lead: 'Sign in to your tickets, your Coffee CV and the member directory.',
+			button: 'Sign in'
+		},
+		signup: {
+			eyebrow: 'Free to join · No tiers',
+			title: ['Your coffee work, ', 'ready to be seen.'],
+			lead: 'One free account for events, the member directory and the World Espresso Championship.',
+			button: 'Create account'
+		},
+		forgot: {
+			eyebrow: 'Happens to everyone',
+			title: ['Reset your ', 'password.'],
+			lead: 'Enter the email you signed up with and we’ll send you a link to choose a new one.',
+			button: 'Send reset link'
+		}
 	};
+
+	/** What joining looks like, start to finish. */
+	const journey = [
+		{ title: 'Create your account', text: 'Email and a password. That’s it.' },
+		{ title: 'Confirm your email', text: 'One click from your inbox.' },
+		{ title: 'Build your Coffee CV', text: 'Your role, skills and experience — about two minutes.' }
+	];
+	const label = 'block font-mono text-[11px] tracking-[0.14em] text-crema uppercase';
 </script>
 
 <svelte:head>
-	<title>{copy[mode].title} — Specialty Coffee Community</title>
+	<title>{mode === 'signup' ? 'Join' : mode === 'signin' ? 'Sign in' : 'Reset password'} — Specialty Coffee Community</title>
 </svelte:head>
 
 <div class="grain" aria-hidden="true"></div>
 <SiteHeader />
 
-<main class="mx-auto flex min-h-[calc(100svh-108px)] max-w-md flex-col justify-center px-6 py-16">
-	{#if form && 'sent' in form}
-		<div class="card-zine p-8 text-center shadow-zine-lg">
-			<MailCheck class="mx-auto size-10 text-primary" />
-			<h1 class="display mt-4 text-3xl font-semibold">Check your inbox</h1>
-			<p class="mt-3 text-[15px] text-roast">
-				{form.sent === 'signup'
-					? 'We sent a confirmation link to'
-					: 'If an account exists for that email, we sent a reset link to'}
-				<b class="text-espresso">{form.email}</b>.
-			</p>
-			<a href="/auth" class="link-zine mt-6 text-[15px]">Back to sign in</a>
-		</div>
-	{:else}
-		<p class="eyebrow">{copy[mode].eyebrow}</p>
-		<h1 class="display mt-3 text-[44px] leading-tight font-semibold tracking-[-0.02em]">
-			{copy[mode].title}
+<main class="mx-auto grid max-w-[1180px] gap-x-16 gap-y-10 px-6 py-14 md:py-20 lg:grid-cols-[1fr_440px]">
+	<!-- Pitch -->
+	<div class="lg:pt-6">
+		<p class="eyebrow">{form && 'sent' in form ? 'Almost there' : copy[mode].eyebrow}</p>
+		<h1 class="display mt-4 max-w-[14ch] text-[44px] leading-[1.02] font-semibold tracking-[-0.035em] md:text-[64px]">
+			{#if form && 'sent' in form}
+				Check your <span class="text-primary italic">inbox.</span>
+			{:else}
+				{copy[mode].title[0]}<span class="text-primary italic">{copy[mode].title[1]}</span>
+			{/if}
 		</h1>
+		<p class="mt-5 max-w-[46ch] text-roast">
+			{form && 'sent' in form ? 'Your link is on its way. Open it on this device to carry on.' : copy[mode].lead}
+		</p>
+	</div>
 
-		{#if mode !== 'forgot'}
-			<div role="tablist" class="mt-8 grid grid-cols-2 card-zine p-1 shadow-zine-sm">
-				<a
-					role="tab"
-					href="/auth?mode=signin{nextQuery}"
-					class="rounded-[10px] py-2 text-center text-[15px] font-semibold {mode === 'signin'
-						? 'bg-espresso text-paper'
-						: 'hover:text-primary'}">Sign in</a
-				>
-				<a
-					role="tab"
-					href="/auth?mode=signup{nextQuery}"
-					class="rounded-[10px] py-2 text-center text-[15px] font-semibold {mode === 'signup'
-						? 'bg-espresso text-paper'
-						: 'hover:text-primary'}">Join free</a
-				>
-			</div>
-		{/if}
-
-		<form
-			method="POST"
-			action="?/{mode}{next ? `&next=${encodeURIComponent(next)}` : ''}"
-			class="mt-6 card-zine p-8 shadow-zine-lg"
-			use:enhance={submit}
-		>
-			{#if form && 'message' in form}
-				<div role="alert" class="mb-5 rounded-[10px] border-2 border-error bg-error/10 px-4 py-3 text-sm text-error">
-					{form.message}
-				</div>
-			{/if}
-
-			<fieldset class="fieldset gap-1">
-				{#if mode === 'signup'}
-					<label class="fieldset-legend font-mono text-[11px] font-normal tracking-[0.14em] text-crema uppercase" for="display_name">
-						Your name <span class="normal-case opacity-70">(optional)</span>
-					</label>
-					<input
-						id="display_name"
-						name="display_name"
-						autocomplete="name"
-						class="input h-12 w-full field-zine"
-						defaultValue={form && 'display_name' in form ? form.display_name : ''}
-					/>
-				{/if}
-
-				<label class="fieldset-legend font-mono text-[11px] font-normal tracking-[0.14em] text-crema uppercase {mode === 'signup' ? 'mt-3' : ''}" for="email">
-					Email
-				</label>
-				<input
-					id="email"
-					name="email"
-					type="email"
-					required
-					autocomplete="email"
-					placeholder="you@coffeeplace.com"
-					class="input h-12 w-full field-zine"
-					defaultValue={email}
-				/>
-
-				{#if mode !== 'forgot'}
-					<div class="mt-3 flex items-baseline justify-between">
-						<label class="fieldset-legend font-mono text-[11px] font-normal tracking-[0.14em] text-crema uppercase" for="password">
-							Password
-						</label>
-						{#if mode === 'signin'}
-							<a href="/auth?mode=forgot" class="text-sm text-roast underline decoration-primary underline-offset-4 hover:text-primary">
-								Forgot?
-							</a>
-						{/if}
-					</div>
-					<input
-						id="password"
-						name="password"
-						type="password"
-						required
-						minlength="8"
-						autocomplete={mode === 'signup' ? 'new-password' : 'current-password'}
-						class="input h-12 w-full field-zine"
-					/>
-					{#if mode === 'signup'}
-						<p class="label text-xs text-crema">At least 8 characters.</p>
-					{/if}
-				{/if}
-			</fieldset>
-
-			<button type="submit" class="btn mt-6 h-12 w-full btn-primary btn-zine text-[15px]" disabled={pending}>
-				{#if pending}<span class="loading loading-sm loading-spinner"></span>{/if}
-				{copy[mode].button}
-			</button>
-
-			{#if mode === 'forgot'}
-				<p class="mt-5 text-center text-sm">
-					<a href="/auth" class="link-zine">Back to sign in</a>
+	<!-- Form (or confirmation) -->
+	<div class="lg:row-span-2 lg:self-center">
+		{#if form && 'sent' in form}
+			<div class="card-zine p-8 shadow-zine-lg">
+				<MailCheck class="size-10 text-primary" />
+				<p class="mt-4 text-[15px] text-roast">
+					{form.sent === 'signup'
+						? 'We sent a confirmation link to'
+						: 'If an account exists for that email, we sent a reset link to'}
+					<b class="break-all text-espresso">{form.email}</b>.
 				</p>
-			{/if}
-		</form>
+				<p class="mt-3 text-sm text-crema">Nothing there? Check spam, or wait a minute and try again.</p>
+				<a href="/auth" class="link-zine mt-6 text-[15px]">Back to sign in</a>
+			</div>
+		{:else}
+			<form
+				method="POST"
+				action="?/{mode}{nextQuery}"
+				class="card-zine p-6 shadow-zine-lg sm:p-8"
+				use:enhance={submit}
+			>
+				{#if form && 'message' in form}
+					<div role="alert" class="mb-5 rounded-[10px] border-2 border-error bg-error/10 px-4 py-3 text-sm text-error">
+						{form.message}
+					</div>
+				{/if}
 
-		{#if mode === 'signup'}
-			<p class="mt-6 text-center font-mono text-xs tracking-[0.1em] text-crema uppercase">
-				No card. No tiers. No 'premium'.
-			</p>
+				<div class="grid gap-4">
+					{#if mode === 'signup'}
+						<label class="block">
+							<span class={label}>Your name</span>
+							<input
+								name="display_name"
+								autocomplete="name"
+								maxlength="80"
+								class="input mt-2 h-12 w-full field-zine"
+								placeholder="Daniel Ortega"
+								defaultValue={form && 'display_name' in form ? form.display_name : ''}
+							/>
+						</label>
+					{/if}
+
+					<label class="block">
+						<span class={label}>Email</span>
+						<input
+							name="email"
+							type="email"
+							required
+							autocomplete="email"
+							placeholder="you@coffeeplace.com"
+							class="input mt-2 h-12 w-full field-zine"
+							defaultValue={email}
+						/>
+					</label>
+
+					{#if mode !== 'forgot'}
+						<label class="block">
+							<span class="{label} flex items-baseline justify-between">
+								Password
+								{#if mode === 'signin'}
+									<a href="/auth?mode=forgot" class="tracking-normal normal-case underline decoration-primary underline-offset-4 hover:text-primary">Forgot?</a>
+								{:else}
+									<span class="tracking-normal normal-case opacity-70">8+ characters</span>
+								{/if}
+							</span>
+							<input
+								name="password"
+								type="password"
+								required
+								minlength="8"
+								autocomplete={mode === 'signup' ? 'new-password' : 'current-password'}
+								class="input mt-2 h-12 w-full field-zine"
+							/>
+						</label>
+					{/if}
+				</div>
+
+				<button type="submit" class="btn mt-6 h-12 w-full btn-primary btn-zine text-[15px]" disabled={pending}>
+					{#if pending}<span class="loading loading-sm loading-spinner"></span>{/if}
+					{copy[mode].button}
+					{#if !pending}<ArrowRight class="size-4" />{/if}
+				</button>
+
+				<p class="mt-5 border-t-2 border-line pt-5 text-center text-sm text-roast">
+					{#if mode === 'signin'}
+						New here? <a href="/auth?mode=signup{nextQuery}" class="link-zine">Join free</a>
+					{:else if mode === 'signup'}
+						Already a member? <a href="/auth?mode=signin{nextQuery}" class="link-zine">Sign in</a>
+					{:else}
+						<a href="/auth" class="link-zine">Back to sign in</a>
+					{/if}
+				</p>
+			</form>
+			{#if mode !== 'forgot'}
+				<p class="mt-4 text-center text-xs text-crema">The same account signs you in to the World Espresso Championship.</p>
+			{/if}
 		{/if}
-		{#if mode !== 'forgot'}
-			<p class="mt-4 text-center text-sm text-roast">
-				Your SCC account also signs you in to the World Espresso Championship.
-			</p>
-		{/if}
+	</div>
+
+	<!-- What happens next (joining only) -->
+	{#if mode === 'signup' || (form && 'sent' in form && form.sent === 'signup')}
+		{@const current = form && 'sent' in form ? 1 : 0}
+		<ol class="grid max-w-xl gap-3">
+			{#each journey as item, i (item.title)}
+				<li class="flex items-start gap-4 rounded-[12px] border-2 border-espresso p-4 {i === current ? 'bg-base-100 shadow-zine-sm' : ''} {i < current ? 'opacity-60' : ''}">
+					<span class="grid size-8 shrink-0 place-items-center rounded-full border-2 border-espresso font-mono text-sm font-semibold {i === current ? 'bg-primary text-primary-content' : i < current ? 'bg-espresso text-paper' : 'bg-base-100'}">
+						{#if i < current}<Check class="size-4" />{:else}{i + 1}{/if}
+					</span>
+					<span>
+						<span class="block font-semibold">{item.title}</span>
+						<span class="text-sm text-roast">{item.text}</span>
+					</span>
+				</li>
+			{/each}
+			<li class="mt-1 font-mono text-[11px] tracking-[0.12em] text-crema uppercase">No card. No tiers. No ‘premium’.</li>
+		</ol>
 	{/if}
 </main>

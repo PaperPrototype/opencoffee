@@ -1,29 +1,33 @@
 <script lang="ts">
 	import {
 		ArrowRight,
+		ArrowUpRight,
 		BookOpen,
 		Briefcase,
 		CalendarDays,
 		Check,
-		ChevronRight,
 		Flame,
 		GraduationCap,
 		IdCard,
-		MapPin,
 		MessagesSquare,
 		Pin,
 		Search,
 		Send,
 		Users
 	} from '@lucide/svelte';
+	import { enhance } from '$app/forms';
+	import { page } from '$app/state';
+	import { badgeById, formatMemberNumber } from '#lib/badges.js';
+	import CoffeeCv from '#lib/components/CoffeeCv.svelte';
+	import MemberBadge from '#lib/components/MemberBadge.svelte';
 	import SiteFooter from '#lib/components/SiteFooter.svelte';
 	import SiteHeader from '#lib/components/SiteHeader.svelte';
 	import TicketCard from '#lib/components/TicketCard.svelte';
 	import {
+		exampleCv,
 		festivals as demoFestivals,
 		foundingClasses,
 		goingAvatars,
-		heroStack as demoHeroStack,
 		moreFestivals as demoMoreFestivals,
 		pledges,
 		threads,
@@ -31,11 +35,16 @@
 	} from '#lib/landing.js';
 	import type { PageProps } from './$types';
 
-	let { data }: PageProps = $props();
+	let { data, form }: PageProps = $props();
+
+	const me = $derived(page.data.me);
+	/** The badge the next person to join gets; null once the 10,000 are gone. */
+	const nextBadge = $derived(badgeById(data.members.next.badge));
+	const nextRun = $derived(data.members.runs.find((r) => r.id === data.members.next.badge));
+	let sending = $state(false);
 
 	// Real events once there are any; the pre-launch demo otherwise (linked to /events, not to fake pages).
 	const toEvents = <T extends object>(list: T[]) => list.map((e) => ({ ...e, href: '/events' }));
-	const heroStack = $derived(data.heroStack.length === 3 ? data.heroStack : toEvents(demoHeroStack));
 	const thisWeek = $derived(data.thisWeek.length ? data.thisWeek : toEvents(demoThisWeek));
 	const weekCount = $derived(data.thisWeek.length ? data.weekCount : 64);
 	const realFestivals = $derived(data.festivals.length > 0);
@@ -48,20 +57,19 @@
 			: demoMoreFestivals.map((label) => ({ label, href: '/events?category=festival' }))
 	);
 
-	const quickFilters = ['Throwdowns', 'Free cuppings', 'This weekend', 'Festivals 2026', 'London', 'Tokyo'];
-
+	/** Only sections that exist link anywhere; the rest say they're coming instead of bouncing you home. */
 	const pillars = [
-		{ icon: CalendarDays, title: 'Events', body: 'Every throwdown, cupping & festival — one calendar.' },
-		{ icon: Briefcase, title: 'Jobs', body: 'Coffee businesses hire here. Applying is free.' },
-		{ icon: GraduationCap, title: 'Knowledge', body: 'Free guides, paths & certificates. Open knowledge.' },
-		{ icon: IdCard, title: 'Coffee CV', body: 'Your public profile for the whole industry.' }
+		{ icon: IdCard, title: 'Coffee CV', body: 'Your public profile for the whole industry.', href: '/members/example' },
+		{ icon: CalendarDays, title: 'Events', body: 'Every throwdown, cupping & festival — one calendar.', href: '/events' },
+		{ icon: Briefcase, title: 'Jobs', body: 'Coffee businesses hire here. Applying is free.', href: null },
+		{ icon: GraduationCap, title: 'Knowledge', body: 'Free guides, paths & certificates. Open knowledge.', href: null }
 	];
 
 	const community = [
-		{ icon: MessagesSquare, title: 'Discussions', body: 'Searchable, permanent threads. No Discord memory-hole.', stat: '3,217 threads' },
-		{ icon: BookOpen, title: 'Knowledge Base', body: 'Free, curated guides from espresso to green buying.', stat: '186 guides' },
-		{ icon: CalendarDays, title: 'Events', body: 'Every coffee event on Earth, one calendar.', stat: '312 listed · 58% free' },
-		{ icon: Briefcase, title: 'Careers', body: 'Salary transparency and real career maps.', stat: '412 salary reports' }
+		{ icon: CalendarDays, title: 'Events', body: 'Every coffee event on Earth, one calendar.', href: '/events', cta: 'Browse events' },
+		{ icon: Users, title: 'Member directory', body: 'Find mentors, peers and people hiring near you.', href: '/members', cta: 'Meet the members' },
+		{ icon: MessagesSquare, title: 'Discussions', body: 'Searchable, permanent threads. No Discord memory-hole.', href: null, cta: null },
+		{ icon: BookOpen, title: 'Knowledge Base', body: 'Free, curated guides from espresso to green buying.', href: null, cta: null }
 	];
 
 	const status = {
@@ -70,12 +78,6 @@
 		new: { label: 'New', icon: Pin, class: 'border-secondary text-secondary' }
 	};
 
-	// Back card, middle card, front card — fanned out like a hand of tickets.
-	const fan = [
-		'-translate-x-[calc(50%+40px)] -translate-y-[calc(50%+46px)] rotate-5 z-10',
-		'-translate-x-1/2 -translate-y-1/2 z-[11]',
-		'-translate-x-[calc(50%-40px)] -translate-y-[calc(50%-46px)] -rotate-5 z-[12]'
-	];
 </script>
 
 <svelte:head>
@@ -91,85 +93,64 @@
 <SiteHeader />
 
 <main>
-	<!-- Hero -->
-	<section class="mx-auto grid max-w-[1344px] items-center gap-10 px-8 pt-16 pb-16 lg:grid-cols-[1.1fr_1fr] lg:pt-20">
+	<!-- Hero: the Coffee CV is the reason to join; the example shows exactly what you get. -->
+	<section class="mx-auto grid max-w-[1344px] items-center gap-14 px-6 pt-14 pb-20 sm:px-8 lg:grid-cols-[1.05fr_1fr] lg:pt-20">
 		<div>
-			<p class="eyebrow">Specialty Coffee Community</p>
-			<p class="mt-3 font-mono text-[13px] font-semibold tracking-[0.18em] uppercase md:text-[15px]">
-				Events<span class="text-primary">.</span> Jobs<span class="text-primary">.</span> Knowledge<span
-					class="text-primary">.</span
-				> <span class="text-primary">Free to join.</span>
+			<p class="flex items-center gap-2 font-mono text-[11px] tracking-[0.16em] text-roast uppercase">
+				<span class="size-2.5 rounded-full bg-accent ring-4 ring-accent/20"></span>
+				A professional home for coffee people
 			</p>
-			<h1
-				class="display mt-4 text-[52px] leading-[1.15] font-semibold tracking-[-0.025em] sm:text-[68px] lg:text-[84px] lg:leading-[1.36]"
-			>
-				Find your coffee people. <span class="squiggle inline-block text-primary italic">Near you.</span>
+			<h1 class="display mt-6 text-[48px] leading-[0.98] font-semibold tracking-[-0.035em] sm:text-[64px] lg:text-[80px]">
+				Your coffee work <span class="text-primary italic">deserves to be recognised.</span>
 			</h1>
-			<p class="mt-6 max-w-[52ch] text-[17px] leading-relaxed text-roast md:text-lg">
-				Throwdowns, cuppings, festivals, and workshops in 41 countries — finally in one place. Free to
-				browse, free to list. Paid tickets carry one small fee — free events stay free.
+			<p class="mt-7 max-w-[54ch] text-[17px] leading-relaxed text-roast md:text-lg">
+				Build a public Coffee CV for your bar work, competition results, judging and coaching. Get found by
+				community-minded employers, and stay for the people, events and learning that move coffee forward.
 			</p>
 
-			<form
-				class="mt-9 flex max-w-[672px] flex-col card-zine shadow-zine sm:flex-row sm:items-center"
-				action="/events"
-				method="GET"
-			>
-				<label class="flex flex-1 items-center">
-					<span class="sr-only">Search events</span>
-					<input
-						type="search"
-						name="q"
-						placeholder="Search events, cities, organizers… try 'throwdown'"
-						class="input h-12 w-full border-0 bg-transparent px-5 text-[15px] placeholder:text-crema focus:outline-none"
-					/>
-				</label>
-				<div class="my-3 hidden w-0.5 self-stretch bg-line sm:block"></div>
-				<button
-					type="button"
-					class="flex h-12 items-center gap-2 px-5 font-mono text-[13px] whitespace-nowrap transition-colors hover:text-primary"
-				>
-					<MapPin class="size-4 text-primary" /> Portland, OR ▾
-				</button>
-				<button type="submit" class="btn m-3 h-12 btn-primary btn-zine px-[26px] text-[15px] sm:m-2">
-					<Search class="size-4" /> Find events
-				</button>
-			</form>
-
-			<p class="mt-3.5 flex flex-wrap items-center gap-1.5 px-1 font-mono text-[13px] text-crema uppercase">
-				<Check class="size-3.5" /> Showing events near Portland, OR — not right?
-				<button class="font-semibold text-espresso underline decoration-primary decoration-2 underline-offset-4 hover:text-primary">
-					Change
-				</button>
-			</p>
-
-			<div class="mt-6 flex flex-wrap gap-2">
-				{#each quickFilters as filter (filter)}
-					<a href="/" class="chip bg-base-100 px-3.5 py-1.5 transition-colors hover:bg-espresso hover:text-paper">{filter}</a>
-				{/each}
+			<div class="mt-9 flex flex-col gap-3 sm:flex-row">
+				{#if me}
+					<a href="/members/{me.memberNumber}" class="btn h-14 btn-primary btn-zine px-7 text-base">See your Coffee CV <ArrowRight class="size-4" /></a>
+					<a href="/welcome" class="btn h-14 btn-zine bg-base-100 px-7 text-base">Edit your Coffee CV</a>
+				{:else}
+					<a href="/auth?mode=signup" class="btn h-14 btn-primary btn-zine px-7 text-base">Join free <ArrowUpRight class="size-4" /></a>
+					<a href="/members/example" class="btn h-14 btn-zine bg-base-100 px-7 text-base">See an example Coffee CV <ArrowUpRight class="size-4" /></a>
+				{/if}
 			</div>
-
-			<p class="mt-8 flex items-center gap-2 font-mono text-[13px] text-crema">
-				<CalendarDays class="size-4 text-primary" /> {weekCount} {weekCount === 1 ? 'event' : 'events'} this week worldwide
+			<p class="mt-5 font-mono text-[11px] tracking-[0.1em] text-crema uppercase">
+				Free to create · Free to be discovered · Free to apply
 			</p>
+
+			{#if !me && nextBadge && nextRun}
+				<!-- Scarcity, stated plainly: the number you'd get and how many are left in your class. -->
+				<a href="#founding" class="group mt-8 flex max-w-md items-center gap-4 border-t-2 border-line pt-6">
+					<MemberBadge badge={nextBadge.id} size="medal" label={false} class="w-14" />
+					<span class="text-sm leading-snug text-roast">
+						Join now and you're <strong class="text-espresso">member {formatMemberNumber(data.members.next.number)}</strong> of
+						<span class="italic">{nextBadge.title}</span>.
+						<span class="mt-1 block font-mono text-[11px] tracking-[0.08em] text-primary uppercase group-hover:underline">
+							{nextRun.left.toLocaleString('en-US')} {nextRun.left === 1 ? 'place' : 'places'} left →
+						</span>
+					</span>
+				</a>
+			{/if}
 		</div>
 
-		<div class="relative hidden h-[700px] lg:block">
-			<img
-				src="/img/stamp-one-small-fee.svg"
-				alt=""
-				class="absolute top-[44%] left-[2%] z-20 size-28 animate-[spin_24s_linear_infinite]"
-			/>
-			{#each heroStack as event, i (event.slug)}
-				<div class="absolute top-1/2 left-1/2 w-[380px] {fan[i]}">
-					<TicketCard {event} />
-				</div>
-			{/each}
-			<p
-				class="absolute inset-x-0 bottom-0 text-center font-mono text-xs tracking-[0.1em] text-crema uppercase"
+		<!-- The example CV, tilted like a printed sheet; the whole card opens the full example. -->
+		<div class="relative mx-auto w-full max-w-[560px]">
+			<div class="absolute -inset-6 -z-10 rounded-full border border-primary/25" aria-hidden="true"></div>
+			<img src="/img/stamp-free-to-join.svg" alt="" class="absolute -bottom-10 -left-8 z-10 hidden size-24 animate-[spin_30s_linear_infinite] sm:block" />
+			<!-- Below lg the sheet is cropped with a fade so the page doesn't become one long CV. -->
+			<a
+				href="/members/example"
+				class="relative block rotate-[1.5deg] transition-transform duration-300 hover:rotate-0 max-lg:max-h-[520px] max-lg:overflow-hidden max-lg:p-2"
+				aria-label="Open the example Coffee CV"
 			>
-				Live from the community calendar
-			</p>
+				<CoffeeCv {...exampleCv} experience={exampleCv.experience.slice(0, 2)} strip={['Public Coffee CV', 'Example profile']} />
+				<span class="absolute inset-x-0 bottom-0 flex h-32 items-end justify-center bg-linear-to-t from-base-200 via-base-200/90 to-transparent pb-4 lg:hidden">
+					<span class="link-zine text-sm">See the full example <ArrowRight class="size-4" /></span>
+				</span>
+			</a>
 		</div>
 	</section>
 
@@ -177,21 +158,90 @@
 	<section class="border-y-2 border-espresso bg-base-100">
 		<div class="grid grid-cols-2 lg:grid-cols-4">
 			{#each pillars as pillar, i (pillar.title)}
-				<a
-					href={pillar.title === 'Events' ? '/events' : '/'}
-					class="group flex flex-col gap-2 p-5 transition-colors hover:bg-base-300 md:px-16 md:py-7 lg:px-16
+				<svelte:element
+					this={pillar.href ? 'a' : 'div'}
+					href={pillar.href}
+					class="group flex flex-col gap-2 p-5 md:px-16 md:py-7 lg:px-16 {pillar.href ? 'transition-colors hover:bg-base-300' : ''}
 						{i % 2 === 1 ? 'border-l-2 border-espresso' : ''}
 						{i === 2 ? 'border-t-2 border-espresso lg:border-t-0 lg:border-l-2' : ''}
 						{i === 3 ? 'border-t-2 lg:border-t-0' : ''}"
 				>
 					<div class="flex items-center justify-between">
 						<pillar.icon class="size-5 text-primary" />
-						<ArrowRight class="size-4 text-roast transition-transform group-hover:translate-x-1" />
+						{#if pillar.href}
+							<ArrowRight class="size-4 text-roast transition-transform group-hover:translate-x-1" />
+						{:else}
+							<span class="font-mono text-[10px] tracking-[0.12em] text-crema uppercase">Opening soon</span>
+						{/if}
 					</div>
 					<span class="mt-2 font-display text-[19px] font-semibold tracking-tight">{pillar.title}</span>
 					<span class="text-[13px] leading-snug text-roast">{pillar.body}</span>
-				</a>
+				</svelte:element>
 			{/each}
+		</div>
+	</section>
+
+	<!-- Founding classes: the actual medals, live progress, and the number you'd get. -->
+	<section id="founding" class="scroll-mt-24 border-b-2 border-espresso bg-base-100 py-24">
+		<div class="mx-auto max-w-[1200px] px-6">
+			<div class="mx-auto max-w-[720px] text-center">
+				<p class="eyebrow">Founding classes</p>
+				<h2 class="mt-4 text-[34px] leading-[1.08] font-semibold tracking-[-0.02em] md:text-[48px]">
+					Three classes. <span class="text-primary italic"><span class="squiggle">All permanent.</span></span>
+				</h2>
+				<p class="mt-5 text-[17px] leading-relaxed text-roast">
+					Your member number is set the moment you join and is never reissued. Join early enough and your Coffee CV
+					carries one of these for good.
+				</p>
+			</div>
+
+			<div class="mt-16 grid gap-14 md:grid-cols-3 md:gap-8">
+				{#each data.members.runs as run, i (run.id)}
+					{@const now = run.id === data.members.next.badge}
+					<article class="flex flex-col items-center text-center">
+						<span class="chip mb-5 {now ? 'border-primary bg-primary text-primary-content' : run.left === 0 ? 'bg-base-300 text-crema' : 'bg-base-100 text-crema'}">
+							{now ? 'Claiming now' : run.left === 0 ? 'Closed · all claimed' : `Opens at ${formatMemberNumber(run.from)}`}
+						</span>
+						<MemberBadge badge={run.id} size="medal" class="w-full max-w-[300px]" />
+						<h3 class="mt-6 font-display text-2xl font-medium italic">{run.title}</h3>
+						<p class="mt-1 font-mono text-xs tracking-[0.08em] text-crema uppercase">
+							Members {formatMemberNumber(run.from)}–{formatMemberNumber(run.limit)}
+						</p>
+						<div
+							class="mt-4 h-2.5 w-full max-w-[260px] overflow-hidden rounded-full border-[1.5px] border-espresso bg-base-200"
+							role="progressbar"
+							aria-label="{run.title}: places claimed"
+							aria-valuenow={run.claimed}
+							aria-valuemin={0}
+							aria-valuemax={run.size}
+						>
+							<!-- At least a sliver once anyone has claimed one, so 1 of 10,000 still shows. -->
+							<div class="h-full" style:background={run.ink} style:width="{run.claimed ? Math.max(2, (run.claimed / run.size) * 100) : 0}%"></div>
+						</div>
+						<p class="mt-2 font-mono text-[11px] tracking-[0.08em] uppercase">
+							<span class="font-semibold">{run.claimed.toLocaleString('en-US')}</span> of {run.size.toLocaleString('en-US')} claimed
+							{#if run.left > 0}<span class="text-primary"> · {run.left.toLocaleString('en-US')} left</span>{/if}
+						</p>
+						<p class="mt-4 max-w-[34ch] text-[15px] leading-relaxed text-roast">{foundingClasses[i]?.blurb}</p>
+					</article>
+				{/each}
+			</div>
+
+			<div class="mt-16 flex flex-col items-center gap-4 text-center">
+				{#if me}
+					<a href="/members/{me.memberNumber}" class="btn h-14 btn-primary btn-zine px-7 text-base">
+						See your badge on your profile <ArrowRight class="size-4" />
+					</a>
+				{:else if nextBadge}
+					<a href="/auth?mode=signup" class="btn h-14 btn-primary btn-zine px-7 text-base">
+						Claim {formatMemberNumber(data.members.next.number)} — join free <ArrowUpRight class="size-4" />
+					</a>
+					<a href="/members/example" class="link-zine text-sm">See a badge on an example Coffee CV <ArrowRight class="size-4" /></a>
+				{:else}
+					<a href="/auth?mode=signup" class="btn h-14 btn-primary btn-zine px-7 text-base">Join free <ArrowUpRight class="size-4" /></a>
+				{/if}
+				<p class="mt-2 font-display text-lg font-semibold italic">No badge ever expires. No number is ever reissued.</p>
+			</div>
 		</div>
 	</section>
 
@@ -205,13 +255,20 @@
 						Don't miss these.
 					</h3>
 				</div>
-				<div class="flex items-center gap-6">
-					<span
-						class="hidden items-center gap-2 rounded-full border-2 border-espresso bg-base-100 px-4 py-2 font-mono text-xs tracking-[0.08em] uppercase md:inline-flex"
-					>
-						<MapPin class="size-4 text-primary" /> Near Portland, OR
-					</span>
-					<a href="/events?when=week" class="link-zine">All {weekCount} this week <ArrowRight class="size-4" /></a>
+				<div class="flex flex-wrap items-center gap-4">
+					<form class="flex items-center card-zine shadow-zine-sm" action="/events" method="GET" role="search">
+						<label class="flex items-center">
+							<span class="sr-only">Search events</span>
+							<input
+								type="search"
+								name="q"
+								placeholder="Throwdown, cupping, city…"
+								class="input h-11 w-56 border-0 bg-transparent px-4 text-[15px] placeholder:text-crema focus:outline-none"
+							/>
+						</label>
+						<button type="submit" class="flex h-11 items-center px-4 hover:text-primary" aria-label="Search events"><Search class="size-4" /></button>
+					</form>
+					<a href="/events?when=week" class="link-zine">See all {weekCount} this week <ArrowRight class="size-4" /></a>
 				</div>
 			</div>
 		</div>
@@ -257,9 +314,8 @@
 							{/if}
 							<span class="chip bg-base-100 whitespace-nowrap"><Users class="size-3 text-primary" /> {fest.going} going</span>
 						</div>
-						<div class="mt-auto flex items-center justify-between gap-3 border-t-2 border-line pt-4">
-							<a href={fest.href} class="link-zine text-sm">Details <ArrowRight class="size-4" /></a>
-							<a href={fest.href} class="btn btn-primary btn-zine text-sm">Get tickets</a>
+						<div class="mt-auto flex items-center justify-end gap-3 border-t-2 border-line pt-4">
+							<a href={fest.href} class="btn btn-primary btn-zine text-sm">{realFestivals ? 'Get tickets' : 'Browse festivals'} <ArrowRight class="size-4" /></a>
 						</div>
 					</div>
 				</article>
@@ -302,8 +358,8 @@
 			</div>
 			<div class="mt-10 flex flex-wrap justify-center gap-4">
 				<a href="/host" class="btn btn-primary text-[15px]">List your event — free</a>
-				<a href="/" class="btn border-2 border-neutral-content bg-transparent text-[15px] text-neutral-content hover:bg-neutral-content hover:text-neutral">
-					See the ticketing math →
+				<a href="/host" class="btn border-2 border-neutral-content bg-transparent text-[15px] text-neutral-content hover:bg-neutral-content hover:text-neutral">
+					See how hosting works →
 				</a>
 			</div>
 		</div>
@@ -321,13 +377,16 @@
 		</p>
 		<div class="mt-12 grid gap-6 sm:grid-cols-2">
 			{#each community as item (item.title)}
-				<a href="/" class="card-zine card-zine-hover flex flex-col p-7">
+				<svelte:element this={item.href ? 'a' : 'div'} href={item.href} class="card-zine flex flex-col p-7 {item.href ? 'card-zine-hover' : 'bg-base-200'}">
 					<item.icon class="size-7 text-primary" strokeWidth={1.75} />
 					<h3 class="mt-6 text-[28px] leading-tight font-medium tracking-[-0.01em]">{item.title}</h3>
 					<p class="mt-3 text-[15px] leading-relaxed text-roast">{item.body}</p>
-					<p class="mt-6 font-mono text-xs tracking-[0.14em] text-crema uppercase">{item.stat}</p>
-					<span class="link-zine mt-3 self-start text-[15px]">Explore <ArrowRight class="size-4" /></span>
-				</a>
+					{#if item.cta}
+						<span class="link-zine mt-6 self-start text-[15px]">{item.cta} <ArrowRight class="size-4" /></span>
+					{:else}
+						<p class="mt-6 font-mono text-xs tracking-[0.14em] text-crema uppercase">Opening soon</p>
+					{/if}
+				</svelte:element>
 			{/each}
 		</div>
 	</section>
@@ -337,19 +396,19 @@
 		<div class="mx-auto max-w-[1100px] px-6">
 			<div class="flex flex-wrap items-end justify-between gap-4">
 				<div>
-					<p class="eyebrow">Live from the forum</p>
+					<p class="eyebrow">A preview of the forum</p>
 					<h2 class="mt-5 text-[30px] leading-[1.08] font-semibold tracking-[-0.02em] md:text-[44px]">
 						The kettle is always on.
 					</h2>
 				</div>
-				<a href="/" class="link-zine">All discussions <ArrowRight class="size-4" /></a>
+				<span class="chip bg-base-100">Opening soon</span>
 			</div>
 
 			<ul class="mt-10 card-zine divide-y-2 divide-line overflow-hidden">
 				{#each threads as thread (thread.title)}
 					{@const s = status[thread.status]}
 					<li>
-						<a href="/" class="flex items-center gap-4 px-7 py-5 transition-colors hover:bg-base-200">
+						<div class="flex items-center gap-4 px-7 py-5">
 							<span class="chip hidden shrink-0 bg-base-100 text-[11px] md:inline-flex">
 								<span class="size-2 rounded-full {thread.dot}"></span>{thread.category}
 							</span>
@@ -364,8 +423,7 @@
 							<span class="chip hidden shrink-0 bg-transparent text-[10px] sm:inline-flex {s.class}">
 								<s.icon class="size-3" />{s.label}
 							</span>
-							<ChevronRight class="size-5 shrink-0 text-roast" />
-						</a>
+						</div>
 					</li>
 				{/each}
 			</ul>
@@ -418,7 +476,19 @@
 			</div>
 		</div>
 
-		<form class="card-zine p-8 shadow-zine-lg" onsubmit={(e) => e.preventDefault()}>
+		<form
+			id="contact"
+			class="card-zine p-8 shadow-zine-lg"
+			method="POST"
+			action="?/contact"
+			use:enhance={() => {
+				sending = true;
+				return async ({ update }) => {
+					await update({ reset: false, invalidateAll: false });
+					sending = false;
+				};
+			}}
+		>
 			<p class="eyebrow">Say hello</p>
 			<h3 class="mt-4 text-2xl font-medium">Contact the founder</h3>
 			<p class="mt-3 text-sm text-roast">
@@ -426,44 +496,24 @@
 			</p>
 			<fieldset class="fieldset mt-4 gap-1">
 				<label class="fieldset-legend font-mono text-[11px] font-normal tracking-[0.14em] text-crema uppercase" for="c-name">Your name</label>
-				<input id="c-name" class="input h-14 w-full field-zine" placeholder="Maya Reyes" />
+				<input id="c-name" name="name" autocomplete="name" class="input h-14 w-full field-zine" placeholder="Maya Reyes" value={form?.name ?? ''} />
 				<label class="fieldset-legend mt-3 font-mono text-[11px] font-normal tracking-[0.14em] text-crema uppercase" for="c-email">Your email</label>
-				<input id="c-email" type="email" class="input h-14 w-full field-zine" placeholder="maya@example.com" />
+				<input id="c-email" name="email" type="email" required autocomplete="email" class="input h-14 w-full field-zine" placeholder="maya@example.com" value={form?.email ?? ''} />
 				<label class="fieldset-legend mt-3 font-mono text-[11px] font-normal tracking-[0.14em] text-crema uppercase" for="c-msg">Message</label>
-				<textarea id="c-msg" class="textarea h-36 w-full field-zine" placeholder="Tell me what's on your mind…"></textarea>
+				<textarea id="c-msg" name="message" required class="textarea h-36 w-full field-zine" placeholder="Tell me what's on your mind…" value={form?.body ?? ''}></textarea>
+				<input type="text" name="company" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true" />
 			</fieldset>
-			<button type="submit" class="btn mt-6 h-14 w-full btn-primary btn-zine text-[15px]">
-				Send message <Send class="size-4" />
-			</button>
+			{#if form && 'sent' in form}
+				<p role="status" class="mt-6 flex items-center gap-2 rounded-[10px] border-2 border-accent bg-accent/10 px-4 py-3 text-sm text-accent">
+					<Check class="size-4" /> Sent. The founder will reply to the email you gave.
+				</p>
+			{:else}
+				{#if form?.contactError}<p role="alert" class="mt-4 text-sm text-error">{form.contactError}</p>{/if}
+				<button type="submit" disabled={sending} class="btn mt-6 h-14 w-full btn-primary btn-zine text-[15px]">
+					{sending ? 'Sending…' : 'Send to the founder'} <Send class="size-4" />
+				</button>
+			{/if}
 		</form>
-	</section>
-
-	<!-- Founding classes -->
-	<section class="border-t-2 border-espresso bg-base-100 py-24">
-		<div class="mx-auto max-w-[880px] px-6">
-			<p class="eyebrow">Founding classes</p>
-			<h2 class="mt-4 text-[30px] leading-[1.1] font-semibold tracking-[-0.02em] md:text-[44px]">
-				Three classes. <span class="text-primary italic"><span class="squiggle">All permanent.</span></span>
-			</h2>
-			<div class="mt-10 space-y-10">
-				{#each foundingClasses as cls (cls.name)}
-					<div class="border-2 border-espresso bg-base-200 p-8">
-						<div class="flex flex-wrap items-baseline justify-between gap-2">
-							<h3 class="text-[26px] font-semibold tracking-[-0.01em] uppercase">{cls.name}</h3>
-							<p class="font-mono text-xs tracking-[0.14em] uppercase">0 of {cls.places} places claimed</p>
-						</div>
-						<p class="mt-3 text-[15px] text-roast">{cls.blurb}</p>
-						<progress class="progress mt-5 h-3 w-full rounded-none border-2 border-espresso bg-base-100 text-primary" value="0" max="100"></progress>
-					</div>
-				{/each}
-			</div>
-			<p class="mt-12 text-center font-mono text-xs tracking-[0.14em] text-crema uppercase">
-				Community-driven · Free to join
-			</p>
-			<p class="mt-3 text-center font-display text-lg font-semibold italic">
-				Every class is permanent. No badge ever expires.
-			</p>
-		</div>
 	</section>
 
 	<!-- WEC cross-promo -->
@@ -478,7 +528,7 @@
 				after the World Barista Championship final. Ready to run the moment it's funded.
 			</p>
 			<a href="https://worldespressochampionship.com" class="btn mt-8 h-14 btn-primary btn-zine px-7 text-[15px]">
-				worldespressochampionship.com →
+				See the championship plan →
 			</a>
 		</div>
 	</section>
@@ -513,7 +563,7 @@
 				{/each}
 			</ul>
 			<p class="mt-8 font-mono text-xs text-neutral-content/50">
-				12,483 members · 312 events listed · join in 20 seconds · no card, obviously
+				{data.members.total.toLocaleString('en-US')} {data.members.total === 1 ? 'member' : 'members'} so far · join in 20 seconds · no card, obviously
 			</p>
 		</div>
 	</section>

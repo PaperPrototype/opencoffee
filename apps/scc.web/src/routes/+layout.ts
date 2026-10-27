@@ -21,5 +21,5 @@ export const load: LayoutLoad = async ({ data, depends, fetch }) => {
 		data: { session }
 	} = await supabase.auth.getSession();
 
-	return { session, supabase, celebration: data.celebration };
+	return { session, supabase, celebration: data.celebration, me: data.me };
 };
