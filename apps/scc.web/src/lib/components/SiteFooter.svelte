@@ -1,7 +1,19 @@
 <script lang="ts">
-	const explore = ['Manifesto', 'Discussions', 'Knowledge', 'Members', 'Events', 'Careers'];
-	const exploreLinks: Record<string, string> = { Events: '/events', Members: '/members' };
+	const explore = ['Manifesto', 'Learn', 'Members', 'Events', 'Jobs'];
+	const exploreLinks: Record<string, string> = {
+		Manifesto: '/manifesto',
+		Learn: '/learn',
+		Members: '/members',
+		Events: '/events',
+		Jobs: '/jobs'
+	};
 	const community = ['Code of Conduct', 'Free-to-Join Pledge', 'Moderation', 'Contact'];
+	const communityLinks: Record<string, string> = {
+		'Code of Conduct': '/manifesto#conduct',
+		'Free-to-Join Pledge': '/manifesto#pledge',
+		Moderation: '/manifesto#conduct',
+		Contact: '/#contact'
+	};
 	const finePrint = ['$0 membership fees', '$0 course fees', '0 ads', '0 data sold'];
 </script>
 
@@ -31,7 +43,7 @@
 			<h4 class="eyebrow text-ember">Community</h4>
 			<ul class="mt-4 space-y-2.5">
 				{#each community as item (item)}
-					<li><a href="/" class="text-[15px] text-neutral-content/80 hover:text-primary">{item}</a></li>
+					<li><a href={communityLinks[item]} class="text-[15px] text-neutral-content/80 hover:text-primary">{item}</a></li>
 				{/each}
 			</ul>
 		</div>

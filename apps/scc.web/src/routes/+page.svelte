@@ -61,15 +61,15 @@
 	const pillars = [
 		{ icon: IdCard, title: 'Coffee CV', body: 'Your public profile for the whole industry.', href: '/members/example' },
 		{ icon: CalendarDays, title: 'Events', body: 'Every throwdown, cupping & festival — one calendar.', href: '/events' },
-		{ icon: Briefcase, title: 'Jobs', body: 'Coffee businesses hire here. Applying is free.', href: null },
-		{ icon: GraduationCap, title: 'Knowledge', body: 'Free guides, paths & certificates. Open knowledge.', href: null }
+		{ icon: Briefcase, title: 'Jobs', body: 'Coffee businesses hire here. Applying is free.', href: '/jobs' },
+		{ icon: GraduationCap, title: 'Learn', body: 'Free fundamentals, skills badges & community courses.', href: '/learn' }
 	];
 
 	const community = [
 		{ icon: CalendarDays, title: 'Events', body: 'Every coffee event on Earth, one calendar.', href: '/events', cta: 'Browse events' },
 		{ icon: Users, title: 'Member directory', body: 'Find mentors, peers and people hiring near you.', href: '/members', cta: 'Meet the members' },
 		{ icon: MessagesSquare, title: 'Discussions', body: 'Searchable, permanent threads. No Discord memory-hole.', href: null, cta: null },
-		{ icon: BookOpen, title: 'Knowledge Base', body: 'Free, curated guides from espresso to green buying.', href: null, cta: null }
+		{ icon: BookOpen, title: 'Learn', body: 'Free fundamentals, skills assessments and community-taught courses.', href: '/learn', cta: 'See the education model' }
 	];
 
 	const status = {

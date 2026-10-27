@@ -13,8 +13,14 @@
 	const badge = $derived(me ? badgeFor(me.memberNumber) : null);
 	const profileHref = $derived(me ? `/members/${me.memberNumber}` : '/account');
 
-	/** Sections that exist so far; the rest still point home. */
-	const links: Record<string, string> = { 'Coffee CV': '/members', Events: '/events', 'For Organizers': '/host' };
+	const links: Record<string, string> = {
+		'Coffee CV': '/members',
+		Jobs: '/jobs',
+		Events: '/events',
+		'For Organizers': '/host',
+		Learn: '/learn',
+		Manifesto: '/manifesto'
+	};
 	const nav = ['Coffee CV', 'Jobs', 'Events', 'For Organizers', 'Learn', 'Manifesto'];
 
 	/** Width at which the full nav fits and the menu button goes away (keep in sync with the classes below). */
