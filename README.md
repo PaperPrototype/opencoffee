@@ -5,3 +5,5 @@ This contains the working project files for the new coffee ecosystem of websites
 - CoffeeSignal.app (coming soon)
 
 They all share a single centralized database and a single authentication server so the same account works across all of our services.
+
+To file new tasks please make a [new issue](https://github.com/PaperPrototype/opencoffee/issues)
